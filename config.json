@@ -1,0 +1,6 @@
+{
+  "asrEngine": "local",
+  "llmEngine": "local",
+  "historyLimit": 10,
+  "baseFolder": "data"
+}
