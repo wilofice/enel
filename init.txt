@@ -1,0 +1,52 @@
+WhatsApp AI Auto-Responder: Project Blueprint (v2)
+This document outlines the architecture and implementation plan for a personal, AI-powered WhatsApp auto-responder using Node.js, designed for flexibility and power.
+
+1. Core Objective:
+To create an automated system that listens to incoming WhatsApp messages, saves media, transcribes audio, drafts intelligent replies using a configurable LLM, and sends them only after user confirmation.
+
+2. Technology Stack (Proposed):
+Language/Runtime: Node.js (v20+ LTS)
+WhatsApp Integration: whatsapp-web.js (~1.23.0) with LocalAuth for session persistence.
+Database: PostgreSQL for robust, scalable data storage.
+Audio Transcription (ASR): Dual-strategy, configurable via settings.
+Option A (Local): Whisper running locally (e.g., via whisper.cpp or a Python wrapper) for privacy and zero cost.
+Option B (Cloud): A cloud-based API (e.g., Google Speech-to-Text, Azure) for maximum speed and accuracy.
+AI Reply Generation (LLM): Dual-strategy, configurable based on user choice.
+Option A (Local): Local models served via Ollama (e.g., Llama 3, Mistral) for privacy and offline capability.
+Option B (Pro): High-performance models like Google's Gemini API for superior reasoning and context awareness.
+User Interaction: Phased approach.
+Phase 1: CLI-based prompts using inquirer for rapid development and testing.
+Phase 2 (Target): A simple web dashboard (using Express/Socket.io) for a richer UI.
+3. Architectural Flow:
+Initialization: Start Node.js app, load configuration file (to determine ASR/LLM choice), connect to PostgreSQL DB, initialize whatsapp-web.js client.
+Authentication: Use QR code via terminal on first run; auto-reconnect on subsequent runs via saved session data.
+Message Ingestion: The message_create event listener is the entry point. All incoming messages are immediately logged to the Messages table.
+Media Handling:
+If a message contains media, it is downloaded.
+The file is saved to a structured folder: baseFolder/{contactName}/{YYYY-MM-DD}/{timestamp}_{id}.ext.
+The file path is logged in the Attachments table.
+Audio Transcription:
+If the attachment is an audio message (ptt), the file is sent to the configured ASR engine (local Whisper or Cloud API) based on the settings file.
+The resulting transcript is stored in the Transcripts table if its confidence (where available) is above a set threshold.
+AI Draft Generation:
+The system fetches recent conversation history from the PostgreSQL DB.
+A prompt is constructed containing persona, history, and the new message/transcript.
+The prompt is sent to the configured LLM (local via Ollama or the Gemini API) based on the user's strategy or a setting.
+User Confirmation (Phase 1 - CLI):
+The draft is presented to the user in the command line.
+The user can Approve (y), Reject (n), or Edit (e) the reply.
+Action & Logging:
+Based on user choice, the message is sent, discarded, or edited and sent.
+The final action and status are updated in the AiReplies database table.
+4. Database Schema Overview (PostgreSQL):
+Contacts: Stores contact info (id TEXT PRIMARY KEY, name TEXT, etc.).
+Messages: Core log of all incoming/outgoing messages (id TEXT PRIMARY KEY, chatId TEXT REFERENCES Contacts(id), etc.).
+Attachments: Links messages to saved media files on disk (id SERIAL PRIMARY KEY, messageId TEXT REFERENCES Messages(id), filePath TEXT).
+Transcripts: Stores text from transcribed audio messages (id SERIAL PRIMARY KEY, messageId TEXT REFERENCES Messages(id), transcriptText TEXT, asrEngine TEXT).
+AiReplies: Tracks drafted replies, their status, and the final sent message (id SERIAL PRIMARY KEY, originalMessageId TEXT REFERENCES Messages(id), draftText TEXT, status TEXT).
+5. Key Best Practices:
+Configuration: Use a .env file for all secrets (PostgreSQL connection string, API keys). Use a separate config.json for non-secret settings (ASR/LLM choice, persona).
+Error Handling: Wrap all I/O, DB, and API calls in try...catch blocks. Implement retry logic with exponential backoff for network requests.
+Security: Acknowledge the unofficial nature of whatsapp-web.js. Do not hardcode secrets. Run on a trusted machine and secure your PostgreSQL instance.
+Testing: Implement unit tests for helper functions (prompt construction, DB queries). Create integration tests for the main message flow, potentially using a dedicated test WhatsApp number.
+Modularity: Abstract the ASR and LLM interactions into separate modules/classes (e.g., asrService.js, llmService.js) with a common interface, making it easy to switch between local and cloud providers.
