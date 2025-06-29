@@ -12,7 +12,7 @@ function buildPrompt(persona, history, newText) {
 }
 
 async function callLocalLLM(prompt) {
-  const body = { model: config.llmModel || 'llama3', prompt };
+  const body = { model: config.llmModel || 'llama3', prompt, stream: false };
   try {
     const res = await fetch('http://localhost:11434/api/generate', {
       method: 'POST',
@@ -23,14 +23,8 @@ async function callLocalLLM(prompt) {
       console.error('Local LLM request failed', await res.text());
       return null;
     }
-    const reader = res.body.getReader();
-    let result = '';
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      result += Buffer.from(value).toString();
-    }
-    return result.trim();
+    const json = await res.json();
+    return json.response ? json.response.trim() : null;
   } catch (err) {
     console.error('Local LLM error', err.message);
     return null;
