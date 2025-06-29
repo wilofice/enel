@@ -52,6 +52,7 @@ function initWhatsApp() {
 
     client.on('message', async (msg) => {
       if (!msg.fromMe) {
+        console.log(msg);
         await storeMessage(msg);
       }
     });
