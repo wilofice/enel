@@ -94,6 +94,7 @@ This functionality is implemented in `src/llm.js`.
 - **Guidelines:** Use `inquirer` to prompt the user.
 - **Expectations:** User decision is captured correctly.
 - **Testing:** Run the CLI flow and exercise each option to ensure correct behavior.
+This functionality is implemented in `src/confirm.js`.
 
 ### Task 12: Send message
 - **Input:** Approved message text and original message reference.
