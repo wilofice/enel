@@ -96,6 +96,14 @@ function enqueueMessage(client, msg) {
   processQueue();
 }
 
+function isRealContactMessage(msg) {
+  if (!msg || !msg.from) return false;
+  if (msg.isStatus) return false;
+  if (msg.from.endsWith('@broadcast')) return false;
+  if (/@\w*newsletter\b/.test(msg.from)) return false;
+  return true;
+}
+
 async function processQueue() {
   if (processingQueue) return;
   processingQueue = true;
@@ -157,7 +165,7 @@ function initWhatsApp() {
     });
 
     client.on('message', (msg) => {
-      if (!msg.fromMe) {
+      if (!msg.fromMe && isRealContactMessage(msg)) {
         enqueueMessage(client, msg);
       }
     });
