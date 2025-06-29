@@ -14,7 +14,7 @@ const { sendMessage } = require('./send');
 async function storeMessage(msg) {
   if (!msg || !msg.id) return;
   const id = msg.id._serialized || msg.id;
-  const chatId = msg.from;
+  const chatId = msg.fromMe ? msg.to : msg.from;
   const timestamp = msg.timestamp;
   const body = msg.body;
 
@@ -45,7 +45,7 @@ async function storeMedia(msg) {
       return;
     }
 
-    const contact = msg.from;
+    const contact = msg.fromMe ? msg.to : msg.from;
     const date = new Date(msg.timestamp * 1000).toISOString().slice(0, 10);
     const dir = path.join(config.baseFolder, contact, date);
     await fs.promises.mkdir(dir, { recursive: true });
@@ -88,6 +88,12 @@ async function transcribeAndStore(msg, filePath) {
   }
 }
 
+async function logMessageDetails(msg) {
+  await storeMessage(msg);
+  const filePath = await storeMedia(msg);
+  await transcribeAndStore(msg, filePath);
+}
+
 const messageQueue = [];
 let processingQueue = false;
 
@@ -119,9 +125,7 @@ async function processQueue() {
 }
 
 async function handleIncoming(client, msg) {
-  await storeMessage(msg);
-  const filePath = await storeMedia(msg);
-  await transcribeAndStore(msg, filePath);
+  await logMessageDetails(msg);
 
   const historyRecords = await getHistory(msg.from, config.historyLimit);
   if (historyRecords.length === 0) return;
@@ -170,8 +174,11 @@ function initWhatsApp() {
       console.error('WhatsApp client error', err);
     });
 
-    client.on('message', (msg) => {
-      if (!msg.fromMe && isRealContactMessage(msg)) {
+    client.on('message_create', async (msg) => {
+      if (!isRealContactMessage(msg)) return;
+      if (msg.fromMe) {
+        await logMessageDetails(msg);
+      } else {
         enqueueMessage(client, msg);
       }
     });
