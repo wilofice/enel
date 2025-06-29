@@ -111,7 +111,6 @@ function initWhatsApp() {
 
     client.on('message', async (msg) => {
       if (!msg.fromMe) {
-        console.log(msg);
         await storeMessage(msg);
         const filePath = await storeMedia(msg);
         await transcribeAndStore(msg, filePath);
