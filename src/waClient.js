@@ -1,6 +1,10 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const fs = require('fs');
+const path = require('path');
+const mime = require('mime');
 const { pool } = require('./db');
+const config = require('./config');
 
 async function storeMessage(msg) {
   if (!msg || !msg.id) return;
@@ -22,6 +26,40 @@ async function storeMessage(msg) {
     );
   } catch (err) {
     console.error('Failed to store message', err.message);
+  }
+}
+
+async function storeMedia(msg) {
+  if (!msg.hasMedia) return;
+  const id = msg.id._serialized || msg.id;
+
+  try {
+    const media = await msg.downloadMedia();
+    if (!media) {
+      console.warn('No media content for message', id);
+      return;
+    }
+
+    const contact = msg.from;
+    const date = new Date(msg.timestamp * 1000).toISOString().slice(0, 10);
+    const dir = path.join(config.baseFolder, contact, date);
+    await fs.promises.mkdir(dir, { recursive: true });
+
+    const extFromMime = media.mimetype ? mime.getExtension(media.mimetype) : '';
+    const extFromName = media.filename ? path.extname(media.filename).slice(1) : '';
+    const ext = extFromMime || extFromName;
+    const filename = `${msg.timestamp}_${id}${ext ? '.' + ext : ''}`;
+    const filePath = path.resolve(dir, filename);
+
+    await fs.promises.writeFile(filePath, media.data, 'base64');
+
+    await pool.query(
+      'INSERT INTO Attachments(messageId, filePath) VALUES ($1, $2)',
+      [id, filePath]
+    );
+    console.log('Saved media to', filePath);
+  } catch (err) {
+    console.error('Failed to store media', err.message);
   }
 }
 
@@ -54,6 +92,7 @@ function initWhatsApp() {
       if (!msg.fromMe) {
         console.log(msg);
         await storeMessage(msg);
+        await storeMedia(msg);
       }
     });
 

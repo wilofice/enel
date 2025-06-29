@@ -5,3 +5,4 @@ logs/
 *.log
 .wwebjs_auth
 .wwebjs_cache
+data/
