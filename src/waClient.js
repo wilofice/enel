@@ -123,11 +123,11 @@ async function handleIncoming(client, msg) {
   const filePath = await storeMedia(msg);
   await transcribeAndStore(msg, filePath);
 
-  const historyRecords = await getHistory(msg.from, config.historyLimit + 1);
+  const historyRecords = await getHistory(msg.from, config.historyLimit);
   if (historyRecords.length === 0) return;
 
-  const [latest, ...rest] = historyRecords;
-  const history = rest.reverse();
+  const latest = historyRecords[historyRecords.length - 1];
+  const history = historyRecords.slice(0, -1);
   const newText = latest.text || '';
 
   const draft = await draftReply(
