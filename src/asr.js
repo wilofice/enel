@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFile } = require('child_process');
-const fetch = require('node-fetch');
+// use global fetch available in Node 18+
 const config = require('./config');
 
 /**

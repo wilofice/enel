@@ -1,7 +1,9 @@
 {
   "asrEngine": "local",
   "llmEngine": "local",
+  "llmModel": "llama3",
   "historyLimit": 10,
   "baseFolder": "data",
-  "transcriptThreshold": 0.5
+  "transcriptThreshold": 0.5,
+  "persona": "You are a helpful WhatsApp assistant."
 }

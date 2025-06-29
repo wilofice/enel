@@ -9,7 +9,8 @@ The architecture and best practices are based on the blueprint in [`init.txt`](i
 1. Install [Node.js](https://nodejs.org/) v20 or later.
 2. Clone this repository and run `npm install`.
 3. Copy `.env.example` to `.env` and update the PostgreSQL connection string and any API keys.
-4. Edit `config.json` if you want to change non-secret settings.
+4. Edit `config.json` if you want to change non-secret settings such as the LLM
+   engine, model, or persona string.
 5. Run `npm start` to launch the app and create the database tables if needed.
 
 ## Roadmap
@@ -85,6 +86,7 @@ The following tasks break down the full implementation into small steps. Each ta
 - **Guidelines:** Support both local models (via Ollama) and pro models (e.g., Gemini API).
 - **Expectations:** Function returns a coherent draft reply.
 - **Testing:** Provide sample history and verify the LLM returns a non-empty draft.
+This functionality is implemented in `src/llm.js`.
 
 ### Task 11: CLI user confirmation
 - **Input:** Draft reply text.
