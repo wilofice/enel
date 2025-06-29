@@ -102,6 +102,7 @@ This functionality is implemented in `src/confirm.js`.
 - **Guidelines:** Only send after explicit approval.
 - **Expectations:** Sent messages appear in WhatsApp and the database reflects the action.
 - **Testing:** Approve a reply and confirm delivery plus database update.
+This functionality is implemented in `src/send.js`.
 
 ### Task 13: Error handling and retry logic
 - **Input:** Failures from network requests or database operations.
