@@ -1,13 +1,21 @@
 // use global fetch in Node 18+
 const config = require('./config');
 
-function buildPrompt(persona, history, newText) {
+function formatTimestamp(ts) {
+  if (!ts) return '';
+  const d = new Date(ts * 1000);
+  return d.toISOString().replace('T', ' ').slice(0, 19);
+}
+
+function buildPrompt(persona, history, newText, newTimestamp) {
   let prompt = persona.trim() + '\n\n';
   for (const msg of history) {
     const role = msg.fromMe ? 'You' : 'Contact';
-    prompt += `${role}: ${msg.text}\n`;
+    const time = formatTimestamp(msg.timestamp);
+    prompt += `[${time}] ${role}: ${msg.text}\n`;
   }
-  prompt += `Contact: ${newText}\nYou:`;
+  const newTime = formatTimestamp(newTimestamp);
+  prompt += `[${newTime}] Contact: ${newText}\nYou:`;
   return prompt;
 }
 
@@ -58,8 +66,10 @@ async function callProLLM(prompt) {
   }
 }
 
-async function draftReply(persona, history, newText) {
-  const prompt = buildPrompt(persona, history, newText);
+async function draftReply(persona, history, newText, newTimestamp) {
+  const prompt = buildPrompt(persona, history, newText, newTimestamp);
+  console.log('\nPrompt sent to LLM:\n');
+  console.log(prompt);
   if (config.llmEngine === 'pro') {
     return callProLLM(prompt);
   }
@@ -72,7 +82,12 @@ if (require.main === module) {
       { fromMe: false, text: 'Hello there!' },
       { fromMe: true, text: 'Hi, how can I help you?' }
     ];
-    const reply = await draftReply(config.persona || 'You are a helpful assistant.', sampleHistory, 'Can you tell me a joke?');
+    const reply = await draftReply(
+      config.persona || 'You are a helpful assistant.',
+      sampleHistory,
+      'Can you tell me a joke?',
+      Math.floor(Date.now() / 1000)
+    );
     console.log('Draft reply:', reply);
   })();
 }

@@ -130,7 +130,12 @@ async function handleIncoming(client, msg) {
   const history = rest.reverse();
   const newText = latest.text || '';
 
-  const draft = await draftReply(config.persona, history, newText);
+  const draft = await draftReply(
+    config.persona,
+    history,
+    newText,
+    latest.timestamp
+  );
   if (!draft) return;
   console.log('Incoming message body: ', msg.body);
   console.log('History of messages is : ', history.map(record => record.text));
