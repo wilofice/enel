@@ -1,0 +1,176 @@
+Here is a detailed guide on how to implement the 'message_create' listener to capture all messages (including your own) and save them to a PostgreSQL database. This forms the foundational logging mechanism for your "Enel" application.
+
+Conceptual Overview
+Event Listener: We will use whatsapp-web.js's client.on('message_create', ...) event. This is crucial as it captures every message creation event on your account, unlike the client.on('message', ...) event which only captures incoming messages.
+Database Connection: We will establish a robust connection to your PostgreSQL database using the popular pg (node-postgres) library. We'll use a connection pool for efficiency, which is best practice for handling multiple database operations.
+Data Mapping: We'll extract relevant information from the message object provided by whatsapp-web.js and map it to the columns of our PostgreSQL table.
+SQL Insertion: We will write a secure INSERT query that uses parameterized inputs to prevent SQL injection vulnerabilities.
+Error Handling: The implementation will include try...catch blocks to gracefully handle potential issues like database connection errors or problems during data insertion.
+Step 1: PostgreSQL Setup and Configuration
+First, ensure you have PostgreSQL installed and running. Then, create a database and a table for your messages.
+
+1. Create the Database:
+Open psql or your preferred PostgreSQL client and run:
+
+SQL
+CREATE DATABASE enel_whatsapp_log;
+2. Connect to the new database and create the messages table:
+
+SQL
+\c enel_whatsapp_log
+
+CREATE TABLE messages (
+    id VARCHAR(255) PRIMARY KEY,
+    message_id_serialized VARCHAR(255) UNIQUE NOT NULL,
+    "from" VARCHAR(255),
+    "to" VARCHAR(255),
+    body TEXT,
+    "timestamp" BIGINT,
+    from_me BOOLEAN,
+    has_media BOOLEAN,
+    ack SMALLINT,
+    message_type VARCHAR(50),
+    device_type VARCHAR(50),
+    is_forwarded BOOLEAN,
+    forwarding_score INT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+id: We'll use the unique message ID from WhatsApp.
+message_id_serialized: This is the full, unique identifier for the message.
+from, to: The sender and receiver's chat IDs.
+ack: Acknowledgment status (e.g., -1 for pending, 1 for sent, 2 for delivered, 3 for read).
+We use quoted identifiers like "from" and "to" because they are reserved keywords in SQL.
+Step 2: Node.js Project Setup
+In your "Enel" project directory, install the pg library.
+
+Bash
+npm install pg
+Update your .env file with your PostgreSQL connection details.
+
+.env
+
+# WhatsApp Config
+# ...
+
+# PostgreSQL Config
+DB_USER=your_postgres_user
+DB_PASSWORD=your_secure_password
+DB_HOST=localhost
+DB_PORT=5432
+DB_DATABASE=enel_whatsapp_log
+Step 3: Database Connection Module
+It's best practice to manage your database connection in a separate module.
+
+File: db.js
+
+JavaScript
+const { Pool } = require('pg');
+require('dotenv').config();
+
+// Create a connection pool. This is more efficient than creating a new client
+// for every query. The pool manages a set of client connections.
+const pool = new Pool({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_DATABASE,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
+});
+
+// Test the connection
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('🔴 Database connection error:', err.stack);
+    } else {
+        console.log('✅ PostgreSQL database connected at:', res.rows[0].now);
+    }
+});
+
+module.exports = {
+    // We export a query function that will be used throughout our application
+    // to interact with the database.
+    query: (text, params) => pool.query(text, params),
+};
+This module creates a connection pool and exports a query function that we can use to run SQL commands from anywhere in our application.
+
+Step 4: Implementing the message_create Listener
+Now, let's modify your main application file (app.js or enel.js) to use the database module and save messages.
+
+File: app.js (or your main project file)
+
+JavaScript
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const db = require('./db'); // Import our database module
+
+// ... (Client initialization)
+const client = new Client({
+    authStrategy: new LocalAuth(),
+    // ... other options
+});
+
+// ... (client.on('qr'), client.on('ready'))
+
+console.log('Initializing message listener...');
+
+client.on('message_create', async (message) => {
+    try {
+        // Log to console for real-time monitoring
+        const logPrefix = message.fromMe ? '[SELF MESSAGE]' : '[INCOMING MESSAGE]';
+        console.log(`${logPrefix} from: ${message.from} to: ${message.to} | type: ${message.type} | body: "${message.body.substring(0, 60)}..."`);
+        
+        // Prepare the SQL query
+        const insertQuery = `
+            INSERT INTO messages(
+                id, message_id_serialized, "from", "to", body, "timestamp", 
+                from_me, has_media, ack, message_type, device_type, 
+                is_forwarded, forwarding_score
+            )
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            ON CONFLICT (message_id_serialized) DO NOTHING;
+        `;
+        
+        // Prepare the values array from the message object
+        const values = [
+            message.id.id,                  // $1
+            message.id._serialized,         // $2
+            message.from,                   // $3
+            message.to,                     // $4
+            message.body,                   // $5
+            message.timestamp,              // $6
+            message.fromMe,                 // $7
+            message.hasMedia,               // $8
+            message.ack,                    // $9
+            message.type,                   // $10
+            message.deviceType,             // $11
+            message.isForwarded,            // $12
+            message.forwardingScore || 0    // $13
+        ];
+        
+        // Execute the query using our db module
+        await db.query(insertQuery, values);
+        
+        console.log(`✅ Message ${message.id.id} saved to database.`);
+
+    } catch (error) {
+        console.error(`🔴 Failed to save message ${message.id.id} to database. Error:`, error);
+    }
+
+    // --- You can add your other "Enel" logic here ---
+    // For example, if it's not from you, trigger the AI response flow.
+    if (!message.fromMe) {
+        // triggerAIResponse(message);
+    }
+});
+
+client.initialize();
+Explanation of the Implementation
+Import db.js: We import the database module we created, giving us access to the query function which uses the connection pool.
+async Listener: The callback function for message_create is declared as async so we can use await for our asynchronous database operation.
+try...catch Block: This is crucial. If the database is down or there's a problem with the query, the catch block will log the error without crashing the entire application.
+SQL INSERT Statement:
+We use parameterized queries ($1, $2, etc.). The pg library automatically sanitizes these inputs, which is the correct way to prevent SQL injection.
+ON CONFLICT (message_id_serialized) DO NOTHING;: This is a powerful feature of PostgreSQL. whatsapp-web.js can sometimes emit the same message event more than once. This clause ensures that if we try to insert a message with a message_id_serialized that already exists, PostgreSQL will simply ignore the command instead of throwing a unique constraint error.
+values Array: We create an array that maps directly to the parameters ($1, $2, ...) in our SQL query. We pull the data directly from the message object provided by the event listener.
+db.query(): We call our exported query function, passing the SQL string and the array of values.
+Logging: We include console logs for both success and failure, which is essential for monitoring and debugging your application in real-time.
+With this detailed implementation, your "Enel" application will now reliably and securely log every single message that passes through your WhatsApp account into a structured PostgreSQL database, ready for analysis, context-gathering, or backup.
