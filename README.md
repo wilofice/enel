@@ -123,7 +123,7 @@ This functionality is implemented in `src/waClient.js`.
 
 ### Task 14: Web dashboard (phase 2)
 - **Input:** Express server and Socket.io.
-- **Output:** Simple dashboard for reviewing messages and approving drafts.
+- **Output:** Simple dashboard for reviewing messages and approving drafts. In this scenario, we must implement a change : the AI drafts are automatically saved in the database and later when the user is available, he can look into each draft messages, validate and send them. Also view of all messages sent in the day. 
 - **Guidelines:** Keep the UI minimal while mirroring CLI functionality.
 - **Expectations:** Users can manage replies from the browser.
 - **Testing:** Start the server, open the dashboard, and approve a draft message.

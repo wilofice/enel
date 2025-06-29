@@ -2,6 +2,11 @@
 
 This document summarizes planned enhancements to the WhatsApp AI auto-responder. The proposals draw inspiration from the repositories [whatsapp-bot](https://github.com/lyfe00011/whatsapp-bot/tree/master/plugins) and [whatsapp-chatgpt](https://github.com/askrella/whatsapp-chatgpt).
 
+## 0. Configurable user approval feature for AI generated messages in settings
+- Default is true to enforce user approbation before sending messages
+- Add a retry policy with the ability for the user to indicate to the LLM what to change in the generated messages.
+
+
 ## 1. Persist Contact Names
 - Store the sender's display name (e.g., `notifyName` or `pushName`) in the `Contacts` table when messages arrive.
 - Update existing entries with new names using `ON CONFLICT` to keep the database accurate.
