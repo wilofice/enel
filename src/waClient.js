@@ -133,7 +133,7 @@ async function handleIncoming(client, msg) {
   const draft = await draftReply(config.persona, history, newText);
   if (!draft) return;
   console.log('Incoming message body: ', msg.body);
-  console.log('History of messages is : ', history);
+  console.log('History of messages is : ', history.map(record => record.text));
   const finalText = await confirmDraft(draft);
   if (finalText) {
     await sendMessage(client, msg.from, finalText, msg.id._serialized || msg.id);
