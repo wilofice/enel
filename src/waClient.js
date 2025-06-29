@@ -1,5 +1,29 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+const { pool } = require('./db');
+
+async function storeMessage(msg) {
+  if (!msg || !msg.id) return;
+  const id = msg.id._serialized || msg.id;
+  const chatId = msg.from;
+  const timestamp = msg.timestamp;
+  const body = msg.body;
+
+  try {
+    await pool.query(
+      'INSERT INTO Contacts(id) VALUES($1) ON CONFLICT (id) DO NOTHING',
+      [chatId]
+    );
+    await pool.query(
+      `INSERT INTO Messages(id, chatId, fromMe, timestamp, body)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (id) DO NOTHING`,
+      [id, chatId, msg.fromMe, timestamp, body]
+    );
+  } catch (err) {
+    console.error('Failed to store message', err.message);
+  }
+}
 
 function initWhatsApp() {
   return new Promise((resolve, reject) => {
@@ -24,6 +48,12 @@ function initWhatsApp() {
 
     client.on('error', (err) => {
       console.error('WhatsApp client error', err);
+    });
+
+    client.on('message', async (msg) => {
+      if (!msg.fromMe) {
+        await storeMessage(msg);
+      }
     });
 
     client.initialize();
