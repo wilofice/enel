@@ -5,6 +5,7 @@ const path = require('path');
 const mime = require('mime');
 const { pool } = require('./db');
 const config = require('./config');
+const asr = require('./asr');
 
 async function storeMessage(msg) {
   if (!msg || !msg.id) return;
@@ -30,7 +31,7 @@ async function storeMessage(msg) {
 }
 
 async function storeMedia(msg) {
-  if (!msg.hasMedia) return;
+  if (!msg.hasMedia) return null;
   const id = msg.id._serialized || msg.id;
 
   try {
@@ -58,8 +59,28 @@ async function storeMedia(msg) {
       [id, filePath]
     );
     console.log('Saved media to', filePath);
+    return filePath;
   } catch (err) {
     console.error('Failed to store media', err.message);
+    return null;
+  }
+}
+
+async function transcribeAndStore(msg, filePath) {
+  if (!filePath) return;
+  const id = msg.id._serialized || msg.id;
+  const result = await asr.transcribe(filePath);
+  if (!result || !result.text) return;
+  const conf = result.confidence ?? 1;
+  if (conf < config.transcriptThreshold) return;
+  try {
+    await pool.query(
+      'INSERT INTO Transcripts(messageId, transcriptText, asrEngine) VALUES ($1, $2, $3)',
+      [id, result.text, config.asrEngine]
+    );
+    console.log('Stored transcript for', id);
+  } catch (err) {
+    console.error('Failed to store transcript', err.message);
   }
 }
 
@@ -92,7 +113,8 @@ function initWhatsApp() {
       if (!msg.fromMe) {
         console.log(msg);
         await storeMessage(msg);
-        await storeMedia(msg);
+        const filePath = await storeMedia(msg);
+        await transcribeAndStore(msg, filePath);
       }
     });
 

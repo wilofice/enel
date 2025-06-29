@@ -8,7 +8,8 @@ const defaults = {
   asrEngine: 'local',
   llmEngine: 'local',
   historyLimit: 10,
-  baseFolder: 'data'
+  baseFolder: 'data',
+  transcriptThreshold: 0
 };
 
 let fileConfig = {};
