@@ -104,6 +104,14 @@ This functionality is implemented in `src/confirm.js`.
 - **Testing:** Approve a reply and confirm delivery plus database update.
 This functionality is implemented in `src/send.js`.
 
+### Task 12.1: Automated reply workflow
+- **Input:** Incoming WhatsApp messages.
+- **Output:** LLM draft, user confirmation prompt, and the final message sent and logged.
+- **Guidelines:** Queue messages to avoid overlapping prompts. After storing the message and any transcript, retrieve history, generate a draft reply with the LLM, ask the user for approval using the CLI, and then send the reply with `src/send.js`.
+- **Expectations:** Multiple incoming messages are processed sequentially without skipping confirmation.
+- **Testing:** Send several messages quickly and verify each draft appears for approval and the replies are delivered in order.
+This functionality is implemented in `src/waClient.js`.
+
 ### Task 13: Error handling and retry logic
 - **Input:** Failures from network requests or database operations.
 - **Output:** Robust retry behavior with exponential backoff.
