@@ -6,6 +6,10 @@ const mime = require('mime');
 const { pool } = require('./db');
 const config = require('./config');
 const asr = require('./asr');
+const { getHistory } = require('./history');
+const { draftReply } = require('./llm');
+const confirmDraft = require('./confirm');
+const { sendMessage } = require('./send');
 
 async function storeMessage(msg) {
   if (!msg || !msg.id) return;
@@ -84,6 +88,49 @@ async function transcribeAndStore(msg, filePath) {
   }
 }
 
+const messageQueue = [];
+let processingQueue = false;
+
+function enqueueMessage(client, msg) {
+  messageQueue.push({ client, msg });
+  processQueue();
+}
+
+async function processQueue() {
+  if (processingQueue) return;
+  processingQueue = true;
+  while (messageQueue.length > 0) {
+    const { client, msg } = messageQueue.shift();
+    try {
+      await handleIncoming(client, msg);
+    } catch (err) {
+      console.error('Failed to process incoming message', err.message);
+    }
+  }
+  processingQueue = false;
+}
+
+async function handleIncoming(client, msg) {
+  await storeMessage(msg);
+  const filePath = await storeMedia(msg);
+  await transcribeAndStore(msg, filePath);
+
+  const historyRecords = await getHistory(msg.from, config.historyLimit + 1);
+  if (historyRecords.length === 0) return;
+
+  const [latest, ...rest] = historyRecords;
+  const history = rest.reverse();
+  const newText = latest.text || '';
+
+  const draft = await draftReply(config.persona, history, newText);
+  if (!draft) return;
+
+  const finalText = await confirmDraft(draft);
+  if (finalText) {
+    await sendMessage(client, msg.from, finalText, msg.id._serialized || msg.id);
+  }
+}
+
 function initWhatsApp() {
   return new Promise((resolve, reject) => {
     const client = new Client({
@@ -109,11 +156,9 @@ function initWhatsApp() {
       console.error('WhatsApp client error', err);
     });
 
-    client.on('message', async (msg) => {
+    client.on('message', (msg) => {
       if (!msg.fromMe) {
-        await storeMessage(msg);
-        const filePath = await storeMedia(msg);
-        await transcribeAndStore(msg, filePath);
+        enqueueMessage(client, msg);
       }
     });
 
