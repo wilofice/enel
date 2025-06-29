@@ -7,9 +7,11 @@ dotenv.config();
 const defaults = {
   asrEngine: 'local',
   llmEngine: 'local',
+  llmModel: 'llama3',
   historyLimit: 10,
   baseFolder: 'data',
-  transcriptThreshold: 0
+  transcriptThreshold: 0,
+  persona: 'You are a helpful WhatsApp assistant.'
 };
 
 let fileConfig = {};
