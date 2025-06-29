@@ -8,8 +8,9 @@ The architecture and best practices are based on the blueprint in [`init.txt`](i
 
 1. Install [Node.js](https://nodejs.org/) v20 or later.
 2. Clone this repository and run `npm install`.
-3. Create a `.env` file with your PostgreSQL connection string and API keys.
-4. Run `npm start` to launch the placeholder script.
+3. Copy `.env.example` to `.env` and update the PostgreSQL connection string and any API keys.
+4. Edit `config.json` if you want to change non-secret settings.
+5. Run `npm start` to launch the app and create the database tables if needed.
 
 ## Roadmap
 
