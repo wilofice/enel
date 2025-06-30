@@ -5,7 +5,7 @@ This document summarizes planned enhancements to the WhatsApp AI auto-responder.
 ## 0. Configurable user approval feature for AI generated messages in settings
 - Default is true to enforce user approbation before sending messages
 - Add a retry policy with the ability for the user to indicate to the LLM what to change in the generated messages.
-
+- Add also a configurable option to turn on or off the generation of the messages to reply.
 
 ## 1. Persist Contact Names
 - Store the sender's display name (e.g., `notifyName` or `pushName`) in the `Contacts` table when messages arrive.
