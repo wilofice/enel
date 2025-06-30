@@ -33,7 +33,7 @@ async function fetchHistory(client, limit = 200) {
       await logMessageDetails(msg);
     }
     console.log(`-> Processed ${messages.length} messages for ${chat.name || chat.id._serialized}`);
-    await sleep(5000);
+    await sleep(30000);
   }
 }
 
