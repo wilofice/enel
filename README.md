@@ -11,7 +11,9 @@ The architecture and best practices are based on the blueprint in [`init.txt`](i
 3. Copy `.env.example` to `.env` and update the PostgreSQL connection string and any API keys.
 4. Edit `config.json` if you want to change non-secret settings such as the LLM
    engine, model, or persona string.
-5. Run `npm start` to launch the app and create the database tables if needed.
+5. If you don't have PostgreSQL installed, you can run a temporary instance using Docker:
+   `docker run --name enel-postgres -e POSTGRES_PASSWORD=pass -p 5432:5432 -d postgres`
+6. Run `npm start` to launch the app and create the database tables if needed.
 
 ## Roadmap
 

@@ -2,6 +2,7 @@ const config = require('./config');
 const db = require('./db');
 const setupDb = require('./setupDb');
 const initWhatsApp = require('./waClient');
+const { maybeFetchHistory } = require('./fetchHistory');
 
 async function start() {
   console.log('Configuration loaded:', {
@@ -13,7 +14,8 @@ async function start() {
   });
   await db.testConnection();
   await setupDb();
-  await initWhatsApp();
+  const client = await initWhatsApp();
+  await maybeFetchHistory(client);
   console.log('WhatsApp AI Auto-Responder initialized');
 }
 
