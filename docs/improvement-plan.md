@@ -76,3 +76,18 @@ the main code.
 ## External Inspiration
 We reviewed the referenced repositories using `git ls-remote` to explore their structure and features. The plugin architecture and message handling patterns informed the improvements above.
 
+
+
+### Task 9: Error handling and retry logic
+- **Input:** Failures from network requests or database operations.
+- **Output:** Robust retry behavior with exponential backoff.
+- **Guidelines:** Wrap I/O in `try...catch` blocks and log errors.
+- **Expectations:** Temporary errors are retried without crashing the app.
+- **Testing:** Simulate an error (e.g., disconnect the network) and observe the retry attempts.
+
+### Task 10: Web dashboard (phase 2)
+- **Input:** Express server and Socket.io.
+- **Output:** Simple dashboard for reviewing messages and approving drafts. In this scenario, we must implement a change : the AI drafts are automatically saved in the database and later when the user is available, he can look into each draft messages, validate and send them. Also view of all messages sent in the day. 
+- **Guidelines:** Keep the UI minimal while mirroring CLI functionality.
+- **Expectations:** Users can manage replies from the browser.
+- **Testing:** Start the server, open the dashboard, and approve a draft message.
