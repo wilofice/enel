@@ -11,7 +11,7 @@ const { logMessageDetails } = require('./messageLogger');
 
 const messageQueue = [];
 let processingQueue = false;
-
+let generateDraftMessages = false;
 function enqueueMessage(client, msg) {
   messageQueue.push({ client, msg });
   processQueue();
@@ -42,6 +42,8 @@ async function processQueue() {
 async function handleIncoming(client, msg) {
   await logMessageDetails(msg);
 
+  if(!generateDraftMessages) return;
+  
   const historyRecords = await getHistory(msg.from, config.historyLimit);
   if (historyRecords.length === 0) return;
 
