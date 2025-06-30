@@ -30,6 +30,9 @@ async function setup() {
       draftText TEXT,
       status TEXT,
       sentMessageId TEXT
+    )`,
+    `CREATE TABLE IF NOT EXISTS FetchMeta (
+      last_fetch TIMESTAMPTZ
     )`
   ];
 
