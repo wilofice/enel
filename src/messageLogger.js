@@ -13,9 +13,13 @@ async function storeMessage(msg) {
   const body = msg.body;
 
   try {
+    const name =
+      msg.notifyName ||
+      msg.pushName ||
+      (msg._data ? msg._data.notifyName || msg._data.pushName : null);
     await pool.query(
-      'INSERT INTO Contacts(id) VALUES($1) ON CONFLICT (id) DO NOTHING',
-      [chatId]
+      'INSERT INTO Contacts(id, name) VALUES($1, $2) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name',
+      [chatId, name]
     );
     await pool.query(
       `INSERT INTO Messages(id, chatId, fromMe, timestamp, body)

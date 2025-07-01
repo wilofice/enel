@@ -50,5 +50,5 @@ async function sendMessage(client, chatId, text, originalMessageId) {
   }
 }
 
-module.exports = { sendMessage };
+module.exports = { sendMessage, logAiReply };
 

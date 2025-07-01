@@ -11,7 +11,11 @@ const defaults = {
   historyLimit: 10,
   baseFolder: 'data',
   transcriptThreshold: 0,
-  persona: 'You are a helpful WhatsApp assistant.'
+  persona: 'You are a helpful WhatsApp assistant.',
+  approvalRequired: true,
+  generateReplies: true,
+  plugins: [],
+  ignoreShortMessages: true
 };
 
 let fileConfig = {};

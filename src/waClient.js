@@ -4,16 +4,20 @@ const config = require('./config');
 const { getHistory } = require('./history');
 const { draftReply } = require('./llm');
 const confirmDraft = require('./confirm');
-const { sendMessage } = require('./send');
+const { sendMessage, logAiReply } = require('./send');
 const { logMessageDetails } = require('./messageLogger');
+const { getContactName } = require('./contacts');
+const PluginManager = require('./pluginManager');
 
 // logMessageDetails is provided by messageLogger.js
 
 const messageQueue = [];
 let processingQueue = false;
-let generateDraftMessages = false;
+let generateDraftMessages = config.generateReplies;
+let pluginManager = null;
 function enqueueMessage(client, msg) {
   messageQueue.push({ client, msg });
+  if (pluginManager) pluginManager.emit('incoming', msg);
   processQueue();
 }
 
@@ -22,6 +26,7 @@ function isRealContactMessage(msg) {
   if (msg.isStatus) return false;
   if (msg.from.endsWith('@broadcast')) return false;
   if (/@\w*newsletter\b/.test(msg.from)) return false;
+  if (config.ignoreShortMessages && msg.body && msg.body.trim().length < 2) return false;
   return true;
 }
 
@@ -43,7 +48,7 @@ async function handleIncoming(client, msg) {
   await logMessageDetails(msg);
 
   if(!generateDraftMessages) return;
-  
+
   const historyRecords = await getHistory(msg.from, config.historyLimit);
   if (historyRecords.length === 0) return;
 
@@ -51,18 +56,24 @@ async function handleIncoming(client, msg) {
   const history = historyRecords.slice(0, -1);
   const newText = latest.text || '';
 
+  const contactName = (await getContactName(msg.from)) || msg.notifyName || 'Contact';
+
   const draft = await draftReply(
     config.persona,
     history,
     newText,
-    latest.timestamp
+    latest.timestamp,
+    contactName
   );
   if (!draft) return;
+  const originalId = msg.id._serialized || msg.id;
+  await logAiReply(originalId, draft, 'draft', null);
   console.log('Incoming message body: ', msg.body);
   console.log('History of messages is : ', history.map(record => record.text));
   const finalText = await confirmDraft(draft);
   if (finalText) {
-    await sendMessage(client, msg.from, finalText, msg.id._serialized || msg.id);
+    const sent = await sendMessage(client, msg.from, finalText, msg.id._serialized || msg.id);
+    if (pluginManager) pluginManager.emit('afterSend', sent);
   }
 }
 
@@ -79,6 +90,8 @@ function initWhatsApp() {
 
     client.on('ready', () => {
       console.log('WhatsApp client ready');
+      pluginManager = new PluginManager({ client, db: null, config });
+      pluginManager.loadPlugins();
       resolve(client);
     });
 
@@ -95,6 +108,7 @@ function initWhatsApp() {
       if (!isRealContactMessage(msg)) return;
       if (msg.fromMe) {
         await logMessageDetails(msg);
+        if (pluginManager) pluginManager.emit('outgoing', msg);
       } else {
         enqueueMessage(client, msg);
       }

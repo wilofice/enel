@@ -7,15 +7,21 @@ function formatTimestamp(ts) {
   return d.toISOString().replace('T', ' ').slice(0, 19);
 }
 
-function buildPrompt(persona, history, newText, newTimestamp) {
+function sanitizeText(text) {
+  if (!text) return '';
+  return text.replace(/https?:\/\/\S+/gi, '[link]');
+}
+
+function buildPrompt(persona, history, newText, newTimestamp, contactName = 'Contact') {
   let prompt = persona.trim() + '\n\n';
   for (const msg of history) {
-    const role = msg.fromMe ? 'You' : 'Contact';
+    const role = msg.fromMe ? 'You' : contactName;
     const time = formatTimestamp(msg.timestamp);
-    prompt += `[${time}] ${role}: ${msg.text}\n`;
+    const text = sanitizeText(msg.text);
+    prompt += `[${time}] ${role}: ${text}\n`;
   }
   const newTime = formatTimestamp(newTimestamp);
-  prompt += `[${newTime}] Contact: ${newText}\nYou:`;
+  prompt += `[${newTime}] ${contactName}: ${sanitizeText(newText)}\nYou:`;
   return prompt;
 }
 
@@ -92,4 +98,4 @@ if (require.main === module) {
   })();
 }
 
-module.exports = { draftReply, buildPrompt };
+module.exports = { draftReply, buildPrompt, sanitizeText };
