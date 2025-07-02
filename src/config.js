@@ -11,6 +11,7 @@ const defaults = {
   historyLimit: 10,
   baseFolder: 'data',
   transcriptThreshold: 0,
+  asrLanguage: 'auto',
   persona: 'You are a helpful WhatsApp assistant.',
   approvalRequired: true,
   generateReplies: true,

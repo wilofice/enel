@@ -16,7 +16,8 @@ async function setup() {
     `CREATE TABLE IF NOT EXISTS Attachments (
       id SERIAL PRIMARY KEY,
       messageId TEXT REFERENCES Messages(id),
-      filePath TEXT
+      filePath TEXT,
+      mimeType TEXT
     )`,
     `CREATE TABLE IF NOT EXISTS Transcripts (
       id SERIAL PRIMARY KEY,
@@ -35,6 +36,11 @@ async function setup() {
       last_fetch TIMESTAMPTZ
     )`
   ];
+
+  // ensure new columns when upgrading
+  queries.push(
+    'ALTER TABLE Attachments ADD COLUMN IF NOT EXISTS mimeType TEXT'
+  );
 
   for (const q of queries) {
     try {

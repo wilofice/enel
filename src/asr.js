@@ -8,11 +8,12 @@ const config = require('./config');
  * Transcribes audio using local Whisper command line.
  * Returns { text, confidence } or null on failure.
  */
-async function transcribeLocal(filePath) {
+async function transcribeLocal(filePath, language = 'auto', onProcess) {
   return new Promise((resolve) => {
     const outDir = path.dirname(filePath);
     const args = [filePath, '--model', 'base', '--output_format', 'txt', '--output_dir', outDir];
-    execFile('whisper', args, (error) => {
+    if (language && language !== 'auto') args.push('--language', language);
+    const child = execFile('whisper', args, (error) => {
       if (error) {
         console.error('Local ASR failed', error.message);
         return resolve(null);
@@ -26,6 +27,7 @@ async function transcribeLocal(filePath) {
         resolve({ text: data.trim(), confidence: 1 });
       });
     });
+    if (typeof onProcess === 'function') onProcess(child);
   });
 }
 
@@ -33,7 +35,7 @@ async function transcribeLocal(filePath) {
  * Example cloud transcription using OpenAI Whisper API.
  * Requires OPENAI_API_KEY in environment variables.
  */
-async function transcribeCloud(filePath) {
+async function transcribeCloud(filePath, language = 'auto') {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     console.error('OPENAI_API_KEY not set for cloud ASR');
@@ -44,6 +46,7 @@ async function transcribeCloud(filePath) {
   const formData = new FormData();
   formData.append('model', 'whisper-1');
   formData.append('file', fs.createReadStream(filePath));
+  if (language && language !== 'auto') formData.append('language', language);
 
   try {
     const res = await fetch(url, {
@@ -63,11 +66,11 @@ async function transcribeCloud(filePath) {
   }
 }
 
-async function transcribe(filePath) {
+async function transcribe(filePath, language = 'auto', onProcess) {
   if (config.asrEngine === 'cloud') {
-    return transcribeCloud(filePath);
+    return transcribeCloud(filePath, language);
   }
-  return transcribeLocal(filePath);
+  return transcribeLocal(filePath, language, onProcess);
 }
 
 module.exports = { transcribe };

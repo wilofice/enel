@@ -30,7 +30,7 @@ async function fetchHistory(client, limit = 200) {
     console.log(`Fetching history for: ${chat.name || chat.id._serialized}`);
     const messages = await chat.fetchMessages({ limit });
     for (const msg of messages) {
-      await logMessageDetails(msg);
+      await logMessageDetails(msg, { transcribe: false });
     }
     console.log(`-> Processed ${messages.length} messages for ${chat.name || chat.id._serialized}`);
     await sleep(30000);

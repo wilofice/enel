@@ -3,6 +3,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const { pool } = require('./db');
 const { sendMessage } = require('./send');
+const audioJob = require('./audioJob');
 
 function startDashboard(client) {
   const app = express();
@@ -24,6 +25,20 @@ function startDashboard(client) {
     await pool.query('UPDATE AiReplies SET status=$1 WHERE id=$2', ['sent', id]);
     io.emit('refresh');
     res.json(sent ? { ok: true } : { ok: false });
+  });
+
+  app.post('/asr/start', (req, res) => {
+    audioJob.startProcessing();
+    res.json({ running: true });
+  });
+
+  app.post('/asr/pause', (req, res) => {
+    audioJob.pauseProcessing();
+    res.json({ running: false });
+  });
+
+  app.get('/asr/status', (req, res) => {
+    res.json({ running: audioJob.isProcessing() });
   });
 
   server.listen(3000, () => console.log('Dashboard running on http://localhost:3000'));
