@@ -4,6 +4,7 @@ const setupDb = require('./setupDb');
 const initWhatsApp = require('./waClient');
 const { maybeFetchHistory } = require('./fetchHistory');
 const startDashboard = require('./dashboard');
+const audioJob = require('./audioJob');
 
 async function start() {
   console.log('Configuration loaded:', {
@@ -17,6 +18,7 @@ async function start() {
   await setupDb();
   const client = await initWhatsApp();
   await maybeFetchHistory(client);
+  audioJob.startProcessing();
   startDashboard(client);
   console.log('WhatsApp AI Auto-Responder initialized');
 }

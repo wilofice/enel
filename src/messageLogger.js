@@ -48,7 +48,8 @@ async function storeMedia(msg) {
     const dir = path.join(config.baseFolder, contact, date);
     await fs.promises.mkdir(dir, { recursive: true });
 
-    const extFromMime = media.mimetype ? mime.getExtension(media.mimetype) : '';
+    const mimeType = media.mimetype || '';
+    const extFromMime = mimeType ? mime.getExtension(mimeType) : '';
     const extFromName = media.filename ? path.extname(media.filename).slice(1) : '';
     const ext = extFromMime || extFromName;
     const filename = `${msg.timestamp}_${id}${ext ? '.' + ext : ''}`;
@@ -57,8 +58,8 @@ async function storeMedia(msg) {
     await fs.promises.writeFile(filePath, media.data, 'base64');
 
     await pool.query(
-      'INSERT INTO Attachments(messageId, filePath) VALUES ($1, $2)',
-      [id, filePath]
+      'INSERT INTO Attachments(messageId, filePath, mimeType) VALUES ($1, $2, $3)',
+      [id, filePath, mimeType]
     );
     console.log('Saved media to', filePath);
     return filePath;
@@ -71,7 +72,7 @@ async function storeMedia(msg) {
 async function transcribeAndStore(msg, filePath) {
   if (!filePath) return;
   const id = msg.id._serialized || msg.id;
-  const result = await asr.transcribe(filePath);
+  const result = await asr.transcribe(filePath, config.asrLanguage);
   if (!result || !result.text) return;
   const conf = result.confidence ?? 1;
   if (conf < config.transcriptThreshold) return;
@@ -86,10 +87,12 @@ async function transcribeAndStore(msg, filePath) {
   }
 }
 
-async function logMessageDetails(msg) {
+async function logMessageDetails(msg, opts = { transcribe: true }) {
   await storeMessage(msg);
   const filePath = await storeMedia(msg);
-  await transcribeAndStore(msg, filePath);
+  if (opts.transcribe) {
+    await transcribeAndStore(msg, filePath);
+  }
 }
 
-module.exports = { logMessageDetails };
+module.exports = { logMessageDetails, storeMessage, storeMedia, transcribeAndStore };
