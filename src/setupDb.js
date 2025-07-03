@@ -4,7 +4,8 @@ async function setup() {
   const queries = [
     `CREATE TABLE IF NOT EXISTS Contacts (
       id TEXT PRIMARY KEY,
-      name TEXT
+      name TEXT,
+      profile TEXT
     )`,
     `CREATE TABLE IF NOT EXISTS Messages (
       id TEXT PRIMARY KEY,
@@ -40,6 +41,9 @@ async function setup() {
   // ensure new columns when upgrading
   queries.push(
     'ALTER TABLE Attachments ADD COLUMN IF NOT EXISTS mimeType TEXT'
+  );
+  queries.push(
+    'ALTER TABLE Contacts ADD COLUMN IF NOT EXISTS profile TEXT'
   );
 
   for (const q of queries) {

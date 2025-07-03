@@ -14,6 +14,7 @@ The architecture and best practices are based on the blueprint in [`init.txt`](i
 5. If you don't have PostgreSQL installed, you can run a temporary instance using Docker:
    `docker run --name enel-postgres -e POSTGRES_PASSWORD=pass -p 5432:5432 -d postgres`
 6. Run `npm start` to launch the app and create the database tables if needed.
+7. To build contact profiles from chat history, run `node src/profileJob.js`.
 
 ## Roadmap
 

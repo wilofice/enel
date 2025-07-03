@@ -16,7 +16,9 @@ const defaults = {
   approvalRequired: true,
   generateReplies: true,
   plugins: [],
-  ignoreShortMessages: true
+  ignoreShortMessages: true,
+  profileLlmEngine: 'local',
+  profileLlmModel: 'llama3'
 };
 
 let fileConfig = {};
