@@ -3,6 +3,7 @@
 This project provides a personal WhatsApp auto-responder powered by Node.js. Incoming messages are logged, media is saved, audio is optionally transcribed, and a Large Language Model (LLM) drafts replies. The user can approve or edit the suggested reply before it is sent.
 
 The architecture and best practices are based on the blueprint in [`init.txt`](init.txt).
+Vector database usage is described in [docs/vector-db-architecture.md](docs/vector-db-architecture.md).
 
 ## Quick Start
 
