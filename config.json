@@ -12,5 +12,5 @@
   "generateReplies": false,
   "plugins": []
   ,"ignoreShortMessages": false,
-  "chromaUrl": "http://localhost:8000"
+  "chromaUrl": "http://localhost:9090"
 }

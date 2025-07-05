@@ -20,7 +20,7 @@ async function start() {
   const client = await initWhatsApp();
   await maybeFetchHistory(client);
   await vectorJob.run();
-  audioJob.startProcessing();
+  //audioJob.startProcessing();
   startDashboard(client);
   console.log('WhatsApp AI Auto-Responder initialized');
 }

@@ -61,4 +61,8 @@ function startDashboard(client) {
   server.listen(3000, () => console.log('Dashboard running on http://localhost:3000'));
 }
 
+if (require.main === module) {
+  startDashboard(null);
+}
+
 module.exports = startDashboard;

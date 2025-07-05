@@ -1,0 +1,23 @@
+
+> enel@1.0.0 start
+> node src/index.js
+
+Configuration loaded: {
+  asrEngine: 'local',
+  llmEngine: 'local',
+  historyLimit: 10,
+  baseFolder: 'data',
+  databaseUrl: 'present'
+}
+(node:25083) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Connected to PostgreSQL
+Database schema ensured
+WhatsApp client ready
+History fetch skipped (recently run)
+Startup failed Error: Chroma request failed: 405
+    at fetchJson (/home/mica/Desktop/enel/src/vectorDb.js:10:11)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async Object.ensureCollection (/home/mica/Desktop/enel/src/vectorDb.js:20:5)
+    at async Object.run (/home/mica/Desktop/enel/src/vectorJob.js:33:3)
+    at async start (/home/mica/Desktop/enel/src/index.js:22:3)

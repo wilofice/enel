@@ -24,7 +24,7 @@ async function processOne() {
       currentProcess = p;
     });
     currentProcess = null;
-    if (result && result.text && (result.confidence ?? 1) >= config.transcriptThreshold) {
+    if (result && result.text !== null && (result.confidence ?? 1) >= config.transcriptThreshold) {
       await pool.query(
         'INSERT INTO Transcripts(messageId, transcriptText, asrEngine, language, languageConfidence) VALUES ($1, $2, $3, $4, $5)',
         [job.messageid, result.text, config.asrEngine, result.language, result.languageConfidence]
