@@ -5,6 +5,7 @@ const path = require('path');
 const { pool } = require('./db');
 const { sendMessage } = require('./send');
 const audioJob = require('./audioJob');
+const config = require('./config');
 
 function startDashboard(client) {
   const app = express();
@@ -14,17 +15,27 @@ function startDashboard(client) {
   app.use(express.static(path.join(__dirname, '../public')));
 
   app.get('/drafts', async (req, res) => {
-    const { rows } = await pool.query('SELECT * FROM AiReplies WHERE status=$1', ['draft']);
+    const { rows } = await pool.query(
+      `SELECT * FROM Outbox WHERE status='draft' ORDER BY createdAt ASC`
+    );
     res.json(rows);
   });
 
   app.post('/send/:id', async (req, res) => {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM AiReplies WHERE id=$1', [id]);
+    const result = await pool.query('SELECT * FROM Outbox WHERE id=$1', [id]);
     if (result.rowCount === 0) return res.status(404).send('Not found');
+    if (config.approvalRequired) {
+      await pool.query('UPDATE Outbox SET status=$1 WHERE id=$2', ['queued', id]);
+      io.emit('refresh');
+      return res.json({ queued: true });
+    }
     const draft = result.rows[0];
-    const sent = await sendMessage(client, draft.originalmessageid, draft.drafttext, draft.originalmessageid);
-    await pool.query('UPDATE AiReplies SET status=$1 WHERE id=$2', ['sent', id]);
+    const sent = await sendMessage(client, draft.chatid, draft.text, draft.sourcemessageid);
+    await pool.query(
+      'UPDATE Outbox SET status=$1, sentMessageId=$2 WHERE id=$3',
+      ['sent', sent && (sent.id?._serialized || sent.id), id]
+    );
     io.emit('refresh');
     res.json(sent ? { ok: true } : { ok: false });
   });
@@ -41,6 +52,25 @@ function startDashboard(client) {
 
   app.get('/asr/status', (req, res) => {
     res.json({ running: audioJob.isProcessing() });
+  });
+
+  app.get('/outbox', async (req, res) => {
+    const { rows } = await pool.query(
+      `SELECT * FROM Outbox WHERE status <> 'sent' ORDER BY priority DESC, id ASC`
+    );
+    res.json(rows);
+  });
+
+  app.post('/outbox/retry/:id', async (req, res) => {
+    const { id } = req.params;
+    await pool.query('UPDATE Outbox SET status=$1, attempts=0 WHERE id=$2', ['queued', id]);
+    io.emit('refresh');
+    res.json({ ok: true });
+  });
+
+  app.get('/jobs', async (req, res) => {
+    const { rows } = await pool.query('SELECT * FROM JobStatus');
+    res.json(rows);
   });
 
   app.get('/sent-today', async (req, res) => {

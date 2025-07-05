@@ -6,7 +6,7 @@ async function fetchDrafts() {
   drafts.forEach(d => {
     const div = document.createElement('div');
     div.className = 'draft';
-    div.textContent = d.drafttext;
+    div.textContent = d.text;
     const btn = document.createElement('button');
     btn.textContent = 'Send';
     btn.onclick = async () => {
@@ -49,13 +49,51 @@ async function fetchSent() {
   });
 }
 
+async function fetchOutbox() {
+  const res = await fetch('/outbox');
+  const rows = await res.json();
+  const container = document.getElementById('outbox');
+  container.innerHTML = '';
+  rows.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'draft';
+    div.textContent = `${r.status} [${r.priority}] ${r.text}`;
+    if (r.status === 'failed') {
+      const btn = document.createElement('button');
+      btn.textContent = 'Retry';
+      btn.onclick = async () => {
+        await fetch('/outbox/retry/' + r.id, { method: 'POST' });
+        fetchOutbox();
+      };
+      div.appendChild(btn);
+    }
+    container.appendChild(div);
+  });
+}
+
+async function fetchJobs() {
+  const res = await fetch('/jobs');
+  const jobs = await res.json();
+  const container = document.getElementById('jobs');
+  container.innerHTML = '';
+  jobs.forEach(j => {
+    const div = document.createElement('div');
+    div.textContent = `${j.job}: start ${j.laststart || 'n/a'} end ${j.lastend || 'n/a'} error ${j.lasterror || ''}`;
+    container.appendChild(div);
+  });
+}
+
 const socket = io();
 socket.on('refresh', () => {
   fetchDrafts();
   fetchSent();
+  fetchOutbox();
+  fetchJobs();
 });
 
 fetchDrafts();
 fetchAsrStatus();
 fetchSent();
+fetchOutbox();
+fetchJobs();
 

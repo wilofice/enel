@@ -15,7 +15,9 @@ async function fetchJson(url, options) {
 async function ensureCollection() {
   if (ensured) return;
   try {
-    await fetchJson(`${baseUrl}/api/v1/collections/${COLLECTION}`);
+    await fetchJson(`${baseUrl}/api/v1/collections?name=${COLLECTION}`, {
+      method: 'GET'
+    });
   } catch {
     await fetchJson(`${baseUrl}/api/v1/collections`, {
       method: 'POST',
