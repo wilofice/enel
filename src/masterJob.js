@@ -7,9 +7,9 @@ const sendQueueJob = require('./sendQueueJob');
 async function run() {
   await db.testConnection();
   await setupDb();
-  const client = await initWhatsApp();
+  //const client = await initWhatsApp();
   await assistantJob.run();
-  await sendQueueJob.run(client);
+  //await sendQueueJob.run(client);
 }
 
 if (require.main === module) {

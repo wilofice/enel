@@ -2,7 +2,6 @@
 # HTTP server settings #
 ########################
 port: 9090
-listen_address: "0.0.0.0"
 max_payload_size_bytes: 41943040
 cors_allow_origins: ["*"]
 
@@ -18,4 +17,4 @@ sysdb:
   sqlite:
     log_topic_namespace: "default"
     log_tenant: "default"
-help: "chroma run --config_path chromaconfig.yaml"
+help: "chroma run chromaconfig.yaml"
