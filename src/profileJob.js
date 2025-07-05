@@ -25,7 +25,7 @@ async function processContact(contactId, limit) {
   const historyText = messages
     .map(m => (m.fromMe ? `Me: ${m.text}` : `${contactName}: ${m.text}`))
     .join('\n');
-  const profile = await generateProfile(historyText, contactName);
+  const profile = await generateProfile(historyText, contactName, contactId);
   if (!profile) return;
   await pool.query('UPDATE Contacts SET profile=$2 WHERE id=$1', [contactId, profile]);
   console.log('Updated profile for', contactId);

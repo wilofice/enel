@@ -1,5 +1,6 @@
 // use global fetch in Node 18+
 const config = require('./config');
+const vectorSearch = require('./vectorSearch');
 
 function formatTimestamp(ts) {
   if (!ts) return '';
@@ -72,8 +73,16 @@ async function callProLLM(prompt) {
   }
 }
 
-async function draftReply(persona, history, newText, newTimestamp) {
-  const prompt = buildPrompt(persona, history, newText, newTimestamp);
+async function draftReply(persona, history, newText, newTimestamp, contactName = 'Contact') {
+  const similar = await vectorSearch.searchSimilar(newText, 3);
+  const extra = similar.map(r => ({
+    fromMe: r.metadata.fromMe,
+    text: r.metadata.text,
+    timestamp: r.metadata.timestamp
+  }));
+  const merged = history.concat(extra);
+  merged.sort((a, b) => a.timestamp - b.timestamp);
+  const prompt = buildPrompt(persona, merged, newText, newTimestamp, contactName);
   console.log('\nPrompt sent to LLM:\n');
   console.log(prompt);
   if (config.llmEngine === 'pro') {

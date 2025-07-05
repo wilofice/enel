@@ -18,7 +18,9 @@ const defaults = {
   plugins: [],
   ignoreShortMessages: true,
   profileLlmEngine: 'local',
-  profileLlmModel: 'llama3'
+  profileLlmModel: 'llama3',
+  whisperModel: 'base',
+  chromaUrl: 'http://localhost:8000'
 };
 
 let fileConfig = {};
