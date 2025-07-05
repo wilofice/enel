@@ -46,6 +46,7 @@ async function setup() {
       status TEXT,
       priority INTEGER DEFAULT 1,
       attempts INTEGER DEFAULT 0,
+      sentMessageId TEXT,
       createdAt TIMESTAMPTZ DEFAULT now()
     )`,
     `CREATE TABLE IF NOT EXISTS JobStatus (
@@ -81,6 +82,9 @@ async function setup() {
   );
   queries.push(
     'ALTER TABLE Transcripts ADD COLUMN IF NOT EXISTS translationLanguage TEXT'
+  );
+  queries.push(
+    'ALTER TABLE Outbox ADD COLUMN IF NOT EXISTS sentMessageId TEXT'
   );
 
   for (const q of queries) {
