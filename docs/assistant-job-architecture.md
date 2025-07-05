@@ -26,6 +26,14 @@ Tracks state for background jobs.
 - `lastError TEXT`
 - `retries INTEGER DEFAULT 0`
 
+## Configuration Flags
+
+Several options in `config.json` influence how the assistant and send jobs work:
+
+- `generateReplies` – when set to `false` the assistant job is disabled and no drafts are produced.
+- `approvalRequired` – if `true` Outbox rows stay in `draft` status until you approve them from the dashboard. Setting it to `false` lets the send job dispatch messages automatically.
+- `ignoreShortMessages` – skip reply generation for very short texts to avoid noise.
+
 ## Assistant Job (`assistantJob.js`)
 
 1. Query the `Messages` table for inbound messages that do not have an entry in `Outbox`.

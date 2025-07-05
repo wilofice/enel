@@ -37,6 +37,24 @@ async function setup() {
       status TEXT,
       sentMessageId TEXT
     )`,
+    `CREATE TABLE IF NOT EXISTS Outbox (
+      id SERIAL PRIMARY KEY,
+      chatId TEXT,
+      sourceMessageId TEXT REFERENCES Messages(id),
+      text TEXT,
+      origin TEXT,
+      status TEXT,
+      priority INTEGER DEFAULT 1,
+      attempts INTEGER DEFAULT 0,
+      createdAt TIMESTAMPTZ DEFAULT now()
+    )`,
+    `CREATE TABLE IF NOT EXISTS JobStatus (
+      job TEXT PRIMARY KEY,
+      lastStart TIMESTAMPTZ,
+      lastEnd TIMESTAMPTZ,
+      lastError TEXT,
+      retries INTEGER DEFAULT 0
+    )`,
     `CREATE TABLE IF NOT EXISTS VectorMeta (
       messageId TEXT PRIMARY KEY
     )`,
