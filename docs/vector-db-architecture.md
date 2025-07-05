@@ -41,5 +41,6 @@ Every module that generates LLM output must perform the vector search step befor
 - ChromaDB can run locally in persistent mode or be hosted remotely. The connection URL should be added to `config.json`.
 - Embedding vectors should use the same dimensionality across the system.
 - The ingestion job can be scheduled with `cron` or triggered at startup similar to `fetchHistory`.
+- The application communicates with ChromaDB through its official JavaScript client instead of raw HTTP requests.
 
 Integrating a vector database in this way ensures that long-term context is accessible without overloading the LLM’s prompt window.

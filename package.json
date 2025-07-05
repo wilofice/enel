@@ -12,14 +12,15 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "chromadb": "^3.0.6",
     "dotenv": "^16.3.1",
+    "express": "^4.19.2",
     "inquirer": "^8.2.6",
     "node-fetch": "^3.3.2",
     "pg": "^8.11.5",
     "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": "^1.31.0",
-    "express": "^4.19.2",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "whatsapp-web.js": "^1.31.0"
   },
   "devDependencies": {
     "jest": "^29.6.1"
