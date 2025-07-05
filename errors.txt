@@ -1,4 +1,3 @@
-
 > enel@1.0.0 start
 > node src/index.js
 
@@ -9,15 +8,36 @@ Configuration loaded: {
   baseFolder: 'data',
   databaseUrl: 'present'
 }
-(node:25083) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(node:102569) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
 (Use `node --trace-deprecation ...` to show where the warning was created)
 Connected to PostgreSQL
 Database schema ensured
 WhatsApp client ready
 History fetch skipped (recently run)
-Startup failed Error: Chroma request failed: 405
-    at fetchJson (/home/mica/Desktop/enel/src/vectorDb.js:10:11)
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package '@chroma-core/default-embed' imported from /home/mica/Desktop/enel/node_modules/chromadb/dist/cjs/chromadb.cjs
+    at packageResolve (node:internal/modules/esm/resolve:845:9)
+    at moduleResolve (node:internal/modules/esm/resolve:918:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1148:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:390:12)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:359:25)
+    at ModuleLoader.getModuleJob (node:internal/modules/esm/loader:234:38)
+    at ModuleLoader.import (node:internal/modules/esm/loader:322:34)
+    at defaultImportModuleDynamically (node:internal/modules/esm/utils:197:36)
+    at importModuleDynamicallyCallback (node:internal/modules/esm/utils:219:12)
+    at getDefaultEFConfig (/home/mica/Desktop/enel/node_modules/chromadb/dist/cjs/chromadb.cjs:1264:42)
+    at processCreateCollectionConfig (/home/mica/Desktop/enel/node_modules/chromadb/dist/cjs/chromadb.cjs:1294:15)
+    at ChromaClient.getOrCreateCollection (/home/mica/Desktop/enel/node_modules/chromadb/dist/cjs/chromadb.cjs:2146:36)
+    at Object.ensureCollection (/home/mica/Desktop/enel/src/vectorDb.js:15:29)
+    at Object.run (/home/mica/Desktop/enel/src/vectorJob.js:33:18)
+    at start (/home/mica/Desktop/enel/src/index.js:22:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+Startup failed Error: Cannot instantiate a collection with the DefaultEmbeddingFunction. Please install @chroma-core/default-embed, or provide a different embedding function
+    at getDefaultEFConfig (/home/mica/Desktop/enel/node_modules/chromadb/dist/cjs/chromadb.cjs:1270:11)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at async Object.ensureCollection (/home/mica/Desktop/enel/src/vectorDb.js:20:5)
+    at async processCreateCollectionConfig (/home/mica/Desktop/enel/node_modules/chromadb/dist/cjs/chromadb.cjs:1294:9)
+    at async ChromaClient.getOrCreateCollection (/home/mica/Desktop/enel/node_modules/chromadb/dist/cjs/chromadb.cjs:2146:30)
+    at async Object.ensureCollection (/home/mica/Desktop/enel/src/vectorDb.js:15:16)
     at async Object.run (/home/mica/Desktop/enel/src/vectorJob.js:33:3)
     at async start (/home/mica/Desktop/enel/src/index.js:22:3)
