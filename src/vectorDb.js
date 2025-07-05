@@ -1,5 +1,6 @@
 const { ChromaClient } = require('chromadb');
 const config = require('./config');
+const embedder = require('./embeddingService');
 
 const COLLECTION = 'messages';
 const chromaUrl = new URL(config.chromaUrl || 'http://localhost:8000');
@@ -12,7 +13,14 @@ let collection;
 
 async function ensureCollection() {
   if (collection) return;
-  collection = await chroma.getOrCreateCollection({ name: COLLECTION });
+  const embeddingFunction = {
+    name: 'hash-embedder',
+    generate: async texts => embedder.embedMany(texts)
+  };
+  collection = await chroma.getOrCreateCollection({
+    name: COLLECTION,
+    embeddingFunction
+  });
 }
 
 async function upsertVector(id, vector, metadata) {
