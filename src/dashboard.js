@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 const { pool } = require('./db');
 const { sendMessage } = require('./send');
 const audioJob = require('./audioJob');
@@ -10,6 +11,7 @@ function startDashboard(client) {
   const server = http.createServer(app);
   const io = new Server(server);
   app.use(express.json());
+  app.use(express.static(path.join(__dirname, '../public')));
 
   app.get('/drafts', async (req, res) => {
     const { rows } = await pool.query('SELECT * FROM AiReplies WHERE status=$1', ['draft']);
@@ -39,6 +41,21 @@ function startDashboard(client) {
 
   app.get('/asr/status', (req, res) => {
     res.json({ running: audioJob.isProcessing() });
+  });
+
+  app.get('/sent-today', async (req, res) => {
+    const start = new Date();
+    start.setUTCHours(0, 0, 0, 0);
+    const ts = Math.floor(start.getTime() / 1000);
+    const { rows } = await pool.query(
+      `SELECT m.chatId, m.timestamp, m.body, c.name
+       FROM Messages m
+       LEFT JOIN Contacts c ON m.chatId = c.id
+       WHERE m.fromMe = true AND m.timestamp >= $1
+       ORDER BY m.timestamp DESC`,
+      [ts]
+    );
+    res.json(rows);
   });
 
   server.listen(3000, () => console.log('Dashboard running on http://localhost:3000'));

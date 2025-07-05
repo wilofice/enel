@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>WhatsApp Dashboard</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .draft { border-bottom: 1px solid #ccc; padding: 8px 0; }
+    button { margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Draft Replies</h1>
+  <div id="drafts"></div>
+  <h2>ASR Job</h2>
+  <button id="start">Start</button>
+  <button id="pause">Pause</button>
+  <span id="asrStatus"></span>
+  <h2>Messages Sent Today</h2>
+  <div id="sent"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
