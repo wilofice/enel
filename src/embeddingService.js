@@ -13,4 +13,8 @@ function embed(text) {
   return vec;
 }
 
-module.exports = { embed };
+function embedMany(texts) {
+  return texts.map(embed);
+}
+
+module.exports = { embed, embedMany };
