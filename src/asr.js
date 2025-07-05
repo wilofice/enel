@@ -11,7 +11,15 @@ const config = require('./config');
 async function transcribeLocal(filePath, language = 'auto', onProcess) {
   return new Promise((resolve) => {
     const outDir = path.dirname(filePath);
-    const args = [filePath, '--model', 'base', '--output_format', 'txt', '--output_dir', outDir];
+    const args = [
+      filePath,
+      '--model',
+      config.whisperModel || 'base',
+      '--output_format',
+      'txt',
+      '--output_dir',
+      outDir
+    ];
     if (language && language !== 'auto') args.push('--language', language);
     const child = execFile('whisper', args, (error) => {
       if (error) {

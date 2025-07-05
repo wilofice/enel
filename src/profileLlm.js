@@ -1,4 +1,5 @@
 const config = require('./config');
+const vectorSearch = require('./vectorSearch');
 
 function buildProfilePrompt(historyText, contactName = 'the contact') {
   const intro =
@@ -55,8 +56,16 @@ async function callProLLM(prompt) {
   }
 }
 
-async function generateProfile(historyText, contactName) {
-  const prompt = buildProfilePrompt(historyText, contactName);
+async function generateProfile(historyText, contactName, chatId) {
+  let extended = historyText;
+  if (chatId) {
+    const similar = await vectorSearch.searchSimilar(historyText, 20, { chatId });
+    const extraText = similar
+      .map(r => (r.metadata.fromMe ? `Me: ${r.metadata.text}` : `${contactName}: ${r.metadata.text}`))
+      .join('\n');
+    if (extraText) extended += `\n${extraText}`;
+  }
+  const prompt = buildProfilePrompt(extended, contactName);
   if (config.profileLlmEngine === 'pro') {
     return callProLLM(prompt);
   }

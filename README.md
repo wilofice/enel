@@ -16,6 +16,7 @@ Vector database usage is described in [docs/vector-db-architecture.md](docs/vect
    `docker run --name enel-postgres -e POSTGRES_PASSWORD=pass -p 5432:5432 -d postgres`
 6. Run `npm start` to launch the app and create the database tables if needed.
 7. To build contact profiles from chat history, run `node src/profileJob.js`.
+8. See [docs/start-guide.md](docs/start-guide.md) for detailed usage tips.
 
 ## Roadmap
 

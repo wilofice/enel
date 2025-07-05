@@ -1,5 +1,6 @@
 {
   "asrEngine": "local",
+  "whisperModel": "base",
   "llmEngine": "local",
   "llmModel": "gemma3:12b",
   "historyLimit": 10,
@@ -10,5 +11,6 @@
   "approvalRequired": true,
   "generateReplies": true,
   "plugins": []
-  ,"ignoreShortMessages": true
+  ,"ignoreShortMessages": true,
+  "chromaUrl": "http://localhost:8000"
 }

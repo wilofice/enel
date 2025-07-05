@@ -33,6 +33,9 @@ async function setup() {
       status TEXT,
       sentMessageId TEXT
     )`,
+    `CREATE TABLE IF NOT EXISTS VectorMeta (
+      messageId TEXT PRIMARY KEY
+    )`,
     `CREATE TABLE IF NOT EXISTS FetchMeta (
       last_fetch TIMESTAMPTZ
     )`
