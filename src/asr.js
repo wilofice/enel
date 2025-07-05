@@ -16,23 +16,41 @@ async function transcribeLocal(filePath, language = 'auto', onProcess) {
       '--model',
       config.whisperModel || 'base',
       '--output_format',
-      'txt',
+      'json',
       '--output_dir',
       outDir
     ];
     if (language && language !== 'auto') args.push('--language', language);
-    const child = execFile('whisper', args, (error) => {
+    let detected = null;
+    let prob = null;
+    const child = execFile('whisper', args, (error, stdout, stderr) => {
       if (error) {
         console.error('Local ASR failed', error.message);
         return resolve(null);
       }
-      const outFile = path.join(outDir, path.basename(filePath, path.extname(filePath)) + '.txt');
+      const langMatch = (stderr || '').match(/Detected language:\s+([\w-]+)\s+with probability\s+([0-9.]+)/i);
+      if (langMatch) {
+        detected = langMatch[1];
+        prob = parseFloat(langMatch[2]);
+      }
+      const outFile = path.join(outDir, path.basename(filePath, path.extname(filePath)) + '.json');
       fs.readFile(outFile, 'utf8', (err, data) => {
         if (err) {
           console.error('Failed to read whisper output', err.message);
           return resolve(null);
         }
-        resolve({ text: data.trim(), confidence: 1 });
+        try {
+          const json = JSON.parse(data);
+          resolve({
+            text: json.text.trim(),
+            confidence: 1,
+            language: detected || json.language,
+            languageConfidence: prob
+          });
+        } catch (e) {
+          console.error('Failed to parse whisper JSON', e.message);
+          resolve(null);
+        }
       });
     });
     if (typeof onProcess === 'function') onProcess(child);
@@ -67,7 +85,7 @@ async function transcribeCloud(filePath, language = 'auto') {
       return null;
     }
     const json = await res.json();
-    return { text: json.text, confidence: 1 };
+    return { text: json.text, confidence: 1, language: null, languageConfidence: null };
   } catch (err) {
     console.error('Cloud ASR error', err.message);
     return null;

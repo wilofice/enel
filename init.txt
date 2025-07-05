@@ -42,7 +42,7 @@ The final action and status are updated in the AiReplies database table.
 Contacts: Stores contact info (id TEXT PRIMARY KEY, name TEXT, etc.).
 Messages: Core log of all incoming/outgoing messages (id TEXT PRIMARY KEY, chatId TEXT REFERENCES Contacts(id), etc.).
 Attachments: Links messages to saved media files on disk (id SERIAL PRIMARY KEY, messageId TEXT REFERENCES Messages(id), filePath TEXT).
-Transcripts: Stores text from transcribed audio messages (id SERIAL PRIMARY KEY, messageId TEXT REFERENCES Messages(id), transcriptText TEXT, asrEngine TEXT).
+Transcripts: Stores text from transcribed audio messages (id SERIAL PRIMARY KEY, messageId TEXT REFERENCES Messages(id), transcriptText TEXT, asrEngine TEXT, language TEXT, languageConfidence REAL, translatedText TEXT, translationLanguage TEXT).
 AiReplies: Tracks drafted replies, their status, and the final sent message (id SERIAL PRIMARY KEY, originalMessageId TEXT REFERENCES Messages(id), draftText TEXT, status TEXT).
 5. Key Best Practices:
 Configuration: Use a .env file for all secrets (PostgreSQL connection string, API keys). Use a separate config.json for non-secret settings (ASR/LLM choice, persona).

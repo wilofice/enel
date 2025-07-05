@@ -78,8 +78,8 @@ async function transcribeAndStore(msg, filePath) {
   if (conf < config.transcriptThreshold) return;
   try {
     await pool.query(
-      'INSERT INTO Transcripts(messageId, transcriptText, asrEngine) VALUES ($1, $2, $3)',
-      [id, result.text, config.asrEngine]
+      'INSERT INTO Transcripts(messageId, transcriptText, asrEngine, language, languageConfidence) VALUES ($1, $2, $3, $4, $5)',
+      [id, result.text, config.asrEngine, result.language, result.languageConfidence]
     );
     console.log('Stored transcript for', id);
   } catch (err) {

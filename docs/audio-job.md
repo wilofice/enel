@@ -14,3 +14,6 @@ background job processes audio attachments after history download.
 
 The language used for transcription is controlled by the new `asrLanguage` option in
 `config.json`. Set it to `auto` to let Whisper detect the language.
+
+Each transcript record now stores the detected language and probability along with
+placeholders for a future translated version of the text.

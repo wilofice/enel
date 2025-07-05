@@ -24,7 +24,11 @@ async function setup() {
       id SERIAL PRIMARY KEY,
       messageId TEXT REFERENCES Messages(id),
       transcriptText TEXT,
-      asrEngine TEXT
+      asrEngine TEXT,
+      language TEXT,
+      languageConfidence REAL,
+      translatedText TEXT,
+      translationLanguage TEXT
     )`,
     `CREATE TABLE IF NOT EXISTS AiReplies (
       id SERIAL PRIMARY KEY,
@@ -47,6 +51,18 @@ async function setup() {
   );
   queries.push(
     'ALTER TABLE Contacts ADD COLUMN IF NOT EXISTS profile TEXT'
+  );
+  queries.push(
+    'ALTER TABLE Transcripts ADD COLUMN IF NOT EXISTS language TEXT'
+  );
+  queries.push(
+    'ALTER TABLE Transcripts ADD COLUMN IF NOT EXISTS languageConfidence REAL'
+  );
+  queries.push(
+    'ALTER TABLE Transcripts ADD COLUMN IF NOT EXISTS translatedText TEXT'
+  );
+  queries.push(
+    'ALTER TABLE Transcripts ADD COLUMN IF NOT EXISTS translationLanguage TEXT'
   );
 
   for (const q of queries) {
