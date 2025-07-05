@@ -34,6 +34,7 @@ This guide explains how to install and run the WhatsApp AI auto-responder.
 - Keep the phone connected to the internet while the bot is running.
 - Avoid running multiple instances simultaneously as WhatsApp may block the session.
 - ChromaDB must be running and reachable at the URL specified in `config.json`.
+- The app uses the official ChromaDB JavaScript client, so no manual HTTP configuration is required.
 - The Whisper CLI should be installed when using the local ASR engine.
 
 
