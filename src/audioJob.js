@@ -18,15 +18,16 @@ async function getNext() {
 async function processOne() {
   const job = await getNext();
   if (!job) return false;
+  console.log('Processing audio job', job.messageid, job.filepath);
   try {
-    const result = await asr.transcribe(job.filePath, config.asrLanguage, p => {
+    const result = await asr.transcribe(job.filepath, config.asrLanguage, p => {
       currentProcess = p;
     });
     currentProcess = null;
     if (result && result.text && (result.confidence ?? 1) >= config.transcriptThreshold) {
       await pool.query(
         'INSERT INTO Transcripts(messageId, transcriptText, asrEngine) VALUES ($1, $2, $3)',
-        [job.messageId, result.text, config.asrEngine]
+        [job.messageid, result.text, config.asrEngine]
       );
     }
   } catch (err) {
@@ -60,5 +61,10 @@ function pauseProcessing() {
 function isProcessing() {
   return running;
 }
+
+if (require.main === module) {
+  startProcessing();
+}
+
 
 module.exports = { startProcessing, pauseProcessing, isProcessing };
