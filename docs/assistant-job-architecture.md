@@ -33,10 +33,11 @@ Several options in `config.json` influence how the assistant and send jobs work:
 - `generateReplies` – when set to `false` the assistant job is disabled and no drafts are produced.
 - `approvalRequired` – if `true` Outbox rows stay in `draft` status until you approve them from the dashboard. Setting it to `false` lets the send job dispatch messages automatically.
 - `ignoreShortMessages` – skip reply generation for very short texts to avoid noise.
+- `assistantLookbackDays` – only process messages from the last N days, newest first.
 
 ## Assistant Job (`assistantJob.js`)
 
-1. Query the `Messages` table for inbound messages that do not have an entry in `Outbox`.
+1. Query the `Messages` table for recent inbound messages (newest first) that do not have an entry in `Outbox`.
 2. For each message, gather recent history using existing helpers and call `draftReply` from `llm.js`.
 3. Insert the generated text into `Outbox` with `origin = 'ai'`,
    `status = 'draft'` and `priority = 1`.

@@ -17,6 +17,7 @@ const defaults = {
   generateReplies: true,
   plugins: [],
   ignoreShortMessages: true,
+  assistantLookbackDays: 2,
   profileLlmEngine: 'local',
   profileLlmModel: 'llama3',
   whisperModel: 'base',
