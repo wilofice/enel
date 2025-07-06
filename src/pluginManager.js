@@ -15,13 +15,15 @@ class PluginManager extends EventEmitter {
     const dir = path.join(__dirname, 'plugins');
     if (!fs.existsSync(dir)) return;
     const files = fs.readdirSync(dir).filter(f => f.endsWith('.js'));
-    for (const file of files) {
-      const name = path.basename(file, '.js');
-      if (Array.isArray(this.config.plugins) && !this.config.plugins.includes(name)) {
+    const available = files.map(f => path.basename(f, '.js'));
+    const wanted = Array.isArray(this.config.plugins) && this.config.plugins.length > 0 ? this.config.plugins : available;
+    for (const name of wanted) {
+      if (!available.includes(name)) {
+        console.warn('Plugin', name, 'not found');
         continue;
       }
       try {
-        const plugin = require(path.join(dir, file));
+        const plugin = require(path.join(dir, name + '.js'));
         if (plugin && typeof plugin.init === 'function') {
           plugin.init({
             client: this.client,

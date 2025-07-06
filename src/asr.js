@@ -1,14 +1,26 @@
 const fs = require('fs');
 const path = require('path');
-const { execFile } = require('child_process');
+const { execFile, execSync } = require('child_process');
 // use global fetch available in Node 18+
 const config = require('./config');
 
+function hasWhisper() {
+  try {
+    execSync('which whisper', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
 /**
  * Transcribes audio using local Whisper command line.
  * Returns { text, confidence } or null on failure.
  */
 async function transcribeLocal(filePath, language = 'auto', onProcess) {
+  if (!hasWhisper()) {
+    console.error('Whisper binary missing; cannot transcribe');
+    return null;
+  }
   return new Promise((resolve) => {
     const outDir = path.dirname(filePath);
     const args = [
@@ -23,7 +35,7 @@ async function transcribeLocal(filePath, language = 'auto', onProcess) {
     if (language && language !== 'auto') args.push('--language', language);
     let detected = null;
     let prob = null;
-    const child = execFile('whisper', args, (error, stdout, stderr) => {
+    const child = execFile('whisper', args, { timeout: 5 * 60_000 }, (error, stdout, stderr) => {
       if (error) {
         console.error('Local ASR failed', error.message);
         return resolve(null);
@@ -52,6 +64,10 @@ async function transcribeLocal(filePath, language = 'auto', onProcess) {
           resolve(null);
         }
       });
+    });
+    child.on('error', err => {
+      console.error('Failed to start whisper', err.message);
+      resolve(null);
     });
     if (typeof onProcess === 'function') onProcess(child);
   });

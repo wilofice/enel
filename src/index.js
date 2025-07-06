@@ -15,7 +15,7 @@ async function start() {
     baseFolder: config.baseFolder,
     databaseUrl: config.databaseUrl ? 'present' : 'missing'
   });
-  await db.testConnection();
+  await db.waitForDb();
   await setupDb();
   const client = await initWhatsApp();
   await maybeFetchHistory(client);

@@ -5,13 +5,27 @@ const path = require('path');
 const { pool } = require('./db');
 const { sendMessage } = require('./send');
 const audioJob = require('./audioJob');
+const basicAuth = require('express-basic-auth');
+const csurf = require('csurf');
+const cookieParser = require('cookie-parser');
 const config = require('./config');
 
 function startDashboard(client) {
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server);
+  if (config.dashboardUser && config.dashboardPass) {
+    const users = {};
+    users[config.dashboardUser] = config.dashboardPass;
+    app.use(basicAuth({ users, challenge: true }));
+  }
+  app.use(cookieParser());
   app.use(express.json());
+  app.use(csurf({ cookie: true }));
+  app.use((req, res, next) => {
+    res.cookie('XSRF-TOKEN', req.csrfToken());
+    next();
+  });
   app.use(express.static(path.join(__dirname, '../public')));
 
   app.get('/drafts', async (req, res) => {
