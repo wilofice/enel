@@ -102,6 +102,36 @@ function startDashboard(client) {
     res.json(rows);
   });
 
+  app.get('/followups', async (req, res) => {
+    const { rows } = await pool.query(
+      `SELECT f.id, f.reason, f.messageId, f.createdAt, c.name, f.contactId
+         FROM FollowUps f
+         LEFT JOIN Contacts c ON f.contactId = c.id
+        WHERE f.resolved = false
+        ORDER BY f.createdAt DESC`
+    );
+    res.json(rows);
+  });
+
+  app.get('/contacts', async (req, res) => {
+    const { rows } = await pool.query('SELECT id, name, profile FROM Contacts ORDER BY name');
+    res.json(rows);
+  });
+
+  app.get('/contacts/:id', async (req, res) => {
+    const { id } = req.params;
+    const { rows } = await pool.query('SELECT id, name, profile FROM Contacts WHERE id=$1', [id]);
+    if (!rows.length) return res.status(404).send('Not found');
+    res.json(rows[0]);
+  });
+
+  app.post('/contacts/:id/profile', async (req, res) => {
+    const { id } = req.params;
+    const { profile } = req.body || {};
+    await pool.query('UPDATE Contacts SET profile=$2 WHERE id=$1', [id, profile]);
+    res.json({ ok: true });
+  });
+
   server.listen(3000, () => console.log('Dashboard running on http://localhost:3000'));
 }
 

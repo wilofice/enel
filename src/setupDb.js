@@ -56,6 +56,14 @@ async function setup() {
       lastError TEXT,
       retries INTEGER DEFAULT 0
     )`,
+    `CREATE TABLE IF NOT EXISTS FollowUps (
+      id SERIAL PRIMARY KEY,
+      contactId TEXT REFERENCES Contacts(id),
+      reason TEXT,
+      messageId TEXT,
+      createdAt TIMESTAMPTZ DEFAULT now(),
+      resolved BOOLEAN DEFAULT false
+    )`,
     `CREATE TABLE IF NOT EXISTS VectorMeta (
       messageId TEXT PRIMARY KEY
     )`,
