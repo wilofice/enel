@@ -1,6 +1,6 @@
 # Getting Started with Enel
 
-This guide explains how to install and run the WhatsApp AI auto-responder.
+This guide explains how to install and run the WhatsApp AI auto-responder. The assistant job now prioritises the newest messages and ignores ones older than a configurable number of days.
 
 ## Installation
 
@@ -10,6 +10,7 @@ This guide explains how to install and run the WhatsApp AI auto-responder.
 4. Review `config.json` for non secret settings. Important fields include:
    - `whisperModel` – local Whisper model name (e.g. `base`).
    - `chromaUrl` – URL of the ChromaDB instance for vector search.
+   - `assistantLookbackDays` – how many days of messages the assistant job will consider.
 5. If PostgreSQL is not available locally, run one quickly with Docker:
    ```bash
    docker run --name enel-postgres -e POSTGRES_PASSWORD=pass -p 5432:5432 -d postgres
@@ -36,5 +37,6 @@ This guide explains how to install and run the WhatsApp AI auto-responder.
 - ChromaDB must be running and reachable at the URL specified in `config.json`.
 - The app uses the official ChromaDB JavaScript client, so no manual HTTP configuration is required.
 - The Whisper CLI should be installed when using the local ASR engine.
+- The assistant job processes only messages from the last `assistantLookbackDays` days, newest first.
 
 

@@ -12,5 +12,6 @@
   "generateReplies": false,
   "plugins": []
   ,"ignoreShortMessages": false,
+  "assistantLookbackDays": 2,
   "chromaUrl": "http://localhost:9090"
 }

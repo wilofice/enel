@@ -26,12 +26,13 @@ async function getPendingMessages(limit = 20) {
        FROM Messages m
        LEFT JOIN Transcripts t ON m.id = t.messageId
        WHERE m.fromMe = false
+         AND m.timestamp >= NOW() - ($2 || ' days')::INTERVAL
          AND NOT EXISTS (
            SELECT 1 FROM Outbox o WHERE o.sourceMessageId = m.id
          )
-       ORDER BY m.timestamp ASC
+       ORDER BY m.timestamp DESC
        LIMIT $1`,
-    [limit]
+    [limit, config.assistantLookbackDays]
   );
   return rows;
 }
