@@ -47,9 +47,42 @@ async function callLocalLLM(prompt) {
 }
 
 async function callProLLM(prompt) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error('OPENAI_API_KEY not set for pro LLM');
+    return null;
+  }
+  const url = 'https://api.openai.com/v1/chat/completions';
+  const body = {
+    model: config.llmModel || 'gpt-3.5-turbo',
+    messages: [{ role: 'user', content: prompt }]
+  };
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      console.error('Pro LLM request failed', await res.text());
+      return null;
+    }
+    const json = await res.json();
+    const text = json.choices?.[0]?.message?.content;
+    return text ? text.trim() : null;
+  } catch (err) {
+    console.error('Pro LLM error', err.message);
+    return null;
+  }
+}
+
+async function callGoogleLLM(prompt) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error('GEMINI_API_KEY not set for pro LLM');
+    console.error('GEMINI_API_KEY not set for Google LLM');
     return null;
   }
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
@@ -61,14 +94,14 @@ async function callProLLM(prompt) {
       body: JSON.stringify(body)
     });
     if (!res.ok) {
-      console.error('Pro LLM request failed', await res.text());
+      console.error('Google LLM request failed', await res.text());
       return null;
     }
     const json = await res.json();
     const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
     return text ? text.trim() : null;
   } catch (err) {
-    console.error('Pro LLM error', err.message);
+    console.error('Google LLM error', err.message);
     return null;
   }
 }
@@ -85,6 +118,9 @@ async function draftReply(persona, history, newText, newTimestamp, contactName =
   const prompt = buildPrompt(persona, merged, newText, newTimestamp, contactName);
   console.log('\nPrompt sent to LLM:\n');
   console.log(prompt);
+  if (config.llmEngine === 'google') {
+    return callGoogleLLM(prompt);
+  }
   if (config.llmEngine === 'pro') {
     return callProLLM(prompt);
   }
