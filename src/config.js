@@ -21,7 +21,9 @@ const defaults = {
   profileLlmEngine: 'local',
   profileLlmModel: 'llama3',
   whisperModel: 'base',
-  chromaUrl: 'http://localhost:8000'
+  chromaUrl: 'http://localhost:8000',
+  dashboardUser: process.env.DASHBOARD_USER || null,
+  dashboardPass: process.env.DASHBOARD_PASS || null
 };
 
 let fileConfig = {};
@@ -36,5 +38,7 @@ try {
 module.exports = {
   ...defaults,
   ...fileConfig,
-  databaseUrl: process.env.DATABASE_URL
+  databaseUrl: process.env.DATABASE_URL,
+  dashboardUser: process.env.DASHBOARD_USER || fileConfig.dashboardUser || defaults.dashboardUser,
+  dashboardPass: process.env.DASHBOARD_PASS || fileConfig.dashboardPass || defaults.dashboardPass
 };

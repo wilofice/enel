@@ -10,16 +10,26 @@ pool.on('error', (err) => {
 });
 
 async function testConnection() {
-  try {
-    await pool.query('SELECT 1');
-    console.log('Connected to PostgreSQL');
-  } catch (err) {
-    console.error('PostgreSQL connection error:', err.message);
-    throw err;
+  await pool.query('SELECT 1');
+}
+
+async function waitForDb(retries = 5, delayMs = 2000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      await testConnection();
+      console.log('Connected to PostgreSQL');
+      return;
+    } catch (err) {
+      console.error('PostgreSQL connection error:', err.message);
+      if (i === retries - 1) throw err;
+      console.log('Retrying database connection in', delayMs, 'ms');
+      await new Promise(r => setTimeout(r, delayMs));
+    }
   }
 }
 
 module.exports = {
   pool,
-  testConnection
+  testConnection,
+  waitForDb
 };

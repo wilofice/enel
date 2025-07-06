@@ -12,11 +12,12 @@ Vector database usage is described in [docs/vector-db-architecture.md](docs/vect
 3. Copy `.env.example` to `.env` and update the PostgreSQL connection string and any API keys.
 4. Edit `config.json` if you want to change non-secret settings such as the LLM
    engine, model, or persona string.
-5. If you don't have PostgreSQL installed, you can run a temporary instance using Docker:
+5. (Optional) verify prerequisites with `node src/checkEnv.js`.
+6. If you don't have PostgreSQL installed, you can run a temporary instance using Docker:
    `docker run --name enel-postgres -e POSTGRES_PASSWORD=pass -p 5432:5432 -d postgres`
-6. Run `npm start` to launch the app and create the database tables if needed.
-7. To build contact profiles from chat history, run `node src/profileJob.js`.
-8. See [docs/start-guide.md](docs/start-guide.md) for detailed usage tips.
+7. Run `npm start` to launch the app and create the database tables if needed.
+8. To build contact profiles from chat history, run `node src/profileJob.js`.
+9. See [docs/start-guide.md](docs/start-guide.md) for detailed usage tips.
 
 ## Roadmap
 
