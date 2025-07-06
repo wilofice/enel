@@ -83,12 +83,26 @@ async function fetchJobs() {
   });
 }
 
+async function fetchFollowUps() {
+  const res = await fetch('/followups');
+  const items = await res.json();
+  const container = document.getElementById('followups');
+  container.innerHTML = '';
+  items.forEach(f => {
+    const div = document.createElement('div');
+    const name = f.name || f.contactid;
+    div.textContent = `${name} (${f.reason})`;
+    container.appendChild(div);
+  });
+}
+
 const socket = io();
 socket.on('refresh', () => {
   fetchDrafts();
   fetchSent();
   fetchOutbox();
   fetchJobs();
+  fetchFollowUps();
 });
 
 fetchDrafts();
@@ -96,4 +110,5 @@ fetchAsrStatus();
 fetchSent();
 fetchOutbox();
 fetchJobs();
+fetchFollowUps();
 
