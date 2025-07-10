@@ -11,6 +11,7 @@ This guide explains how to install and run the WhatsApp AI auto-responder. The a
    - `whisperModel` – local Whisper model name (e.g. `base`).
    - `chromaUrl` – URL of the ChromaDB instance for vector search.
    - `assistantLookbackDays` – how many days of messages the assistant job will consider.
+   - `llmEngine` – set to `local`, `pro`, or `google` to choose the LLM provider.
 5. If PostgreSQL is not available locally, run one quickly with Docker:
    ```bash
    docker run --name enel-postgres -e POSTGRES_PASSWORD=pass -p 5432:5432 -d postgres
