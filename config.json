@@ -18,6 +18,7 @@
   "skipVectorJob": true,
   "dashboardPort": 3001,
   "contactRefreshDays": 7,
-  "whatsAppWebVersion": "2.3000.1017054665",
-  "webVersionRemotePath": "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html"
+  "whatsAppWebVersion": "2.3000.1032274475-alpha",
+  "webVersionRemotePath": "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html",
+  "webVersionCacheStrict": false
 }

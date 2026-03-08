@@ -24,6 +24,7 @@ const defaults = {
   chromaUrl: 'http://localhost:8000',
   whatsAppWebVersion: '2.3000.1017054665',
   webVersionRemotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
+  webVersionCacheStrict: false,
   dashboardUser: process.env.DASHBOARD_USER || null,
   dashboardPass: process.env.DASHBOARD_PASS || null
 };

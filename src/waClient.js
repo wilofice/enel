@@ -81,6 +81,8 @@ const webVersion = config.whatsAppWebVersion || '2.3000.1017054665';
 const webVersionRemotePath =
   config.webVersionRemotePath ||
   'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html';
+const strictWebCache =
+  typeof config.webVersionCacheStrict === 'boolean' ? config.webVersionCacheStrict : false;
 
 function initWhatsApp() {
   return new Promise((resolve, reject) => {
@@ -102,7 +104,7 @@ function initWhatsApp() {
       webVersionCache: {
         type: 'remote',
         remotePath: webVersionRemotePath,
-        strict: true
+        strict: strictWebCache
       }
     });
 
