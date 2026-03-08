@@ -95,6 +95,17 @@ function initWhatsApp() {
       resolve(client);
     });
 
+    client.on('authenticated', () => {
+      console.log('WhatsApp client authenticated - waiting for ready...');
+    });
+
+    client.on('loading_screen', (percent, message) => {
+      console.log('WhatsApp loading screen:', percent, message);
+    });
+
+    client.on('disconnected', (reason) => {
+      console.log('WhatsApp client disconnected:', reason);
+    });
     client.on('auth_failure', (msg) => {
       console.error('Authentication failure', msg);
       reject(new Error('Authentication failed'));
