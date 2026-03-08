@@ -121,10 +121,11 @@ function startDashboard(client) {
         c.name, 
         c.profile,
         c.contactNumber,
-        COALESCE(c.lastSentAt, MAX(m.timestamp)) as last_sent
+        c.lastMessageAt,
+        COALESCE(c.lastMessageAt, MAX(m.timestamp)) as last_sent
       FROM Contacts c
-      LEFT JOIN Messages m ON c.id = m.chatId AND m.fromMe = true
-      GROUP BY c.id, c.seq, c.name, c.profile, c.contactNumber, c.lastSentAt
+      LEFT JOIN Messages m ON c.id = m.chatId
+      GROUP BY c.id, c.seq, c.name, c.profile, c.contactNumber, c.lastMessageAt
       ORDER BY c.seq
     `);
     res.json(rows);

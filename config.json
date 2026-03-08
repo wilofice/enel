@@ -20,5 +20,8 @@
   "contactRefreshDays": 7,
   "whatsAppWebVersion": "2.3000.1032274475",
   "webVersionRemotePath": "https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}-alpha.html",
-  "webVersionCacheStrict": true
+  "webVersionCacheStrict": true,
+  "fetchHistoryMessageLimit": 200,
+  "fetchHistoryStoreMessages": true,
+  "fetchHistoryStoreMedia": true
 }

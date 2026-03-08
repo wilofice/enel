@@ -1,4 +1,5 @@
 const { pool } = require('./db');
+const config = require('./config');
 const { logMessageDetails } = require('./messageLogger');
 
 function normalizeChatId(chat) {
@@ -56,7 +57,9 @@ async function updateLastFetch() {
   }
 }
 
-async function fetchHistory(client, limit = 200) {
+async function fetchHistory(client, limit = config.fetchHistoryMessageLimit || 200) {
+  const storeMessages = config.fetchHistoryStoreMessages !== false;
+  const storeMedia = storeMessages && config.fetchHistoryStoreMedia !== false;
   const chats = await client.getChats();
   console.log(`Found ${chats.length} chats. Starting fetch...`);
   for (const chat of chats) {
@@ -65,10 +68,26 @@ async function fetchHistory(client, limit = 200) {
     await upsertContact(chat);
     console.log(`Fetching history for: ${chat.name || id}`);
     const messages = await chat.fetchMessages({ limit });
+    let latestTimestamp = null;
     for (const msg of messages) {
-      await logMessageDetails(msg, { transcribe: false });
+      if (storeMessages) {
+        await logMessageDetails(msg, { transcribe: false, storeMedia, storeMessage: true });
+      }
+      if (typeof msg.timestamp === 'number') {
+        if (latestTimestamp === null || msg.timestamp > latestTimestamp) {
+          latestTimestamp = msg.timestamp;
+        }
+      }
     }
-    console.log(`-> Processed ${messages.length} messages for ${chat.name || id}`);
+    if (latestTimestamp !== null) {
+      await pool.query(
+        `UPDATE Contacts SET lastMessageAt = GREATEST(COALESCE(lastMessageAt, 0), $2) WHERE id=$1`,
+        [id, latestTimestamp]
+      );
+    }
+    console.log(
+      `-> Processed ${messages.length} messages for ${chat.name || id} (storeMessages=${storeMessages})`
+    );
     await sleep(30000);
   }
 }

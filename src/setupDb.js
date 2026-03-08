@@ -8,7 +8,8 @@ async function setup() {
       name TEXT,
       profile TEXT,
       contactNumber TEXT UNIQUE,
-      lastSentAt BIGINT
+      lastSentAt BIGINT,
+      lastMessageAt BIGINT
     )`,
     `CREATE TABLE IF NOT EXISTS Messages (
       id TEXT PRIMARY KEY,
@@ -91,6 +92,9 @@ async function setup() {
   );
   queries.push(
     'ALTER TABLE Contacts ADD COLUMN IF NOT EXISTS lastSentAt BIGINT'
+  );
+  queries.push(
+    'ALTER TABLE Contacts ADD COLUMN IF NOT EXISTS lastMessageAt BIGINT'
   );
   queries.push(
     'CREATE UNIQUE INDEX IF NOT EXISTS contacts_contactnumber_key ON Contacts(contactNumber) WHERE contactNumber IS NOT NULL'

@@ -26,16 +26,20 @@ async function storeMessage(msg) {
       msg.pushName ||
       (msg._data ? msg._data.notifyName || msg._data.pushName : null);
     await pool.query(
-      `INSERT INTO Contacts(id, name, contactNumber, lastSentAt)
-       VALUES($1, $2, $3, $4)
+      `INSERT INTO Contacts(id, name, contactNumber, lastSentAt, lastMessageAt)
+       VALUES($1, $2, $3, $4, $5)
        ON CONFLICT (id) DO UPDATE SET
          name = COALESCE(EXCLUDED.name, Contacts.name),
          contactNumber = COALESCE(EXCLUDED.contactNumber, Contacts.contactNumber),
          lastSentAt = CASE
            WHEN EXCLUDED.lastSentAt IS NOT NULL THEN GREATEST(EXCLUDED.lastSentAt, Contacts.lastSentAt)
            ELSE Contacts.lastSentAt
+         END,
+         lastMessageAt = CASE
+           WHEN EXCLUDED.lastMessageAt IS NOT NULL THEN GREATEST(EXCLUDED.lastMessageAt, Contacts.lastMessageAt)
+           ELSE Contacts.lastMessageAt
          END`,
-      [chatId, name, contactNumber, lastSentAt]
+      [chatId, name, contactNumber, lastSentAt, timestamp]
     );
     await pool.query(
       `INSERT INTO Messages(id, chatId, fromMe, timestamp, body)
@@ -103,10 +107,23 @@ async function transcribeAndStore(msg, filePath) {
   }
 }
 
-async function logMessageDetails(msg, opts = { transcribe: true }) {
-  await storeMessage(msg);
-  const filePath = await storeMedia(msg);
-  if (opts.transcribe) {
+async function logMessageDetails(msg, opts = {}) {
+  const {
+    transcribe = true,
+    storeMessage: shouldStoreMessage = true,
+    storeMedia: shouldStoreMedia = true
+  } = opts;
+
+  let filePath = null;
+  if (shouldStoreMessage) {
+    await storeMessage(msg);
+  }
+  if (shouldStoreMedia && shouldStoreMessage) {
+    filePath = await storeMedia(msg);
+  } else if (shouldStoreMedia && !shouldStoreMessage) {
+    console.warn('Cannot store media when storeMessage=false; skipping media download');
+  }
+  if (transcribe && filePath) {
     await transcribeAndStore(msg, filePath);
   }
 }

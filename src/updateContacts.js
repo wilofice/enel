@@ -51,28 +51,51 @@ async function buildLastSentMap() {
   return map;
 }
 
+async function buildLastMessageMap() {
+  const map = new Map();
+  try {
+    const { rows } = await pool.query(
+      `SELECT chatId, MAX(timestamp) AS last_msg
+         FROM Messages
+        GROUP BY chatId`
+    );
+    for (const row of rows) {
+      map.set(row.chatid, Number(row.last_msg));
+    }
+  } catch (err) {
+    console.error('Failed to build last-message map', err.message);
+  }
+  return map;
+}
+
 async function refreshContacts(client) {
   try {
     console.log('Refreshing contacts from WhatsApp...');
     const contacts = await client.getContacts();
     let count = 0;
     const lastSentMap = await buildLastSentMap();
+     const lastMessageMap = await buildLastMessageMap();
     for (const c of contacts) {
       const waId = c.id?._serialized || c.id;
       if (!waId || waId.endsWith('@g.us') || waId.endsWith('@newsletter') || waId === 'status@broadcast') continue;
       const name = c.pushname || c.name || null;
       const contactNumber = c.number || normalizeContactNumber(waId);
       const lastSentAt = lastSentMap.get(waId) || null;
+      const lastMessageAt = lastMessageMap.get(waId) || null;
       await pool.query(
-        `INSERT INTO Contacts(id, name, contactNumber, lastSentAt) VALUES($1, $2, $3, $4)
+        `INSERT INTO Contacts(id, name, contactNumber, lastSentAt, lastMessageAt) VALUES($1, $2, $3, $4, $5)
          ON CONFLICT (id) DO UPDATE SET
            name = COALESCE(EXCLUDED.name, Contacts.name),
            contactNumber = COALESCE(EXCLUDED.contactNumber, Contacts.contactNumber),
            lastSentAt = CASE
              WHEN EXCLUDED.lastSentAt IS NOT NULL THEN GREATEST(EXCLUDED.lastSentAt, Contacts.lastSentAt)
              ELSE Contacts.lastSentAt
+           END,
+           lastMessageAt = CASE
+             WHEN EXCLUDED.lastMessageAt IS NOT NULL THEN GREATEST(EXCLUDED.lastMessageAt, Contacts.lastMessageAt)
+             ELSE Contacts.lastMessageAt
            END`,
-        [waId, name, contactNumber, lastSentAt]
+        [waId, name, contactNumber, lastSentAt, lastMessageAt]
       );
       count++;
     }

@@ -25,6 +25,9 @@ const defaults = {
   whatsAppWebVersion: '2.3000.1032274475',
   webVersionRemotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}-alpha.html',
   webVersionCacheStrict: false,
+  fetchHistoryMessageLimit: 200,
+  fetchHistoryStoreMessages: true,
+  fetchHistoryStoreMedia: true,
   dashboardUser: process.env.DASHBOARD_USER || null,
   dashboardPass: process.env.DASHBOARD_PASS || null
 };

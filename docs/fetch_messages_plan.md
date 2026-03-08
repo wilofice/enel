@@ -16,6 +16,7 @@ This script uses `chat.fetchMessages()` from **whatsapp-web.js** to backfill the
 - Run the script sparingly. Fetching large histories frequently can trigger account bans.
 - Prioritise important chats rather than fetching every conversation.
 - Combine this one-time backfill with the realtime `message_create` listener to capture new messages going forward.
+- Use the knobs in `config.json` (`fetchHistoryMessageLimit`, `fetchHistoryStoreMessages`, `fetchHistoryStoreMedia`) to throttle how much data is pulled when you only need contact metadata.
 
 ## Weekly Execution
 
