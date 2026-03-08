@@ -7,6 +7,7 @@ const startDashboard = require('./dashboard');
 const audioJob = require('./audioJob');
 const vectorJob = require('./vectorJob');
 const { acquireLock } = require('./lock');
+const { refreshContacts, shouldRefresh } = require('./updateContacts');
 
 async function start() {
   acquireLock();
@@ -25,6 +26,9 @@ async function start() {
   }
   if (!config.skipVectorJob) {
     await vectorJob.run();
+  }
+  if (await shouldRefresh()) {
+    await refreshContacts(client);
   }
   //audioJob.startProcessing();
   startDashboard(client);

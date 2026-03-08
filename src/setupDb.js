@@ -4,6 +4,7 @@ async function setup() {
   const queries = [
     `CREATE TABLE IF NOT EXISTS Contacts (
       id TEXT PRIMARY KEY,
+      seq SERIAL UNIQUE,
       name TEXT,
       profile TEXT
     )`,
@@ -69,6 +70,10 @@ async function setup() {
     )`,
     `CREATE TABLE IF NOT EXISTS FetchMeta (
       last_fetch TIMESTAMPTZ
+    )`,
+    `CREATE TABLE IF NOT EXISTS AppMeta (
+      key TEXT PRIMARY KEY,
+      value TEXT
     )`
   ];
 

@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <title>WhatsApp Dashboard</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .draft { border-bottom: 1px solid #ccc; padding: 8px 0; }
-    button { margin-left: 10px; }
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    .draft {
+      border-bottom: 1px solid #ccc;
+      padding: 8px 0;
+    }
+
+    button {
+      margin-left: 10px;
+    }
   </style>
 </head>
+
 <body>
   <h1>Draft Replies</h1>
   <div id="drafts"></div>
@@ -22,10 +34,14 @@
   <div id="jobs"></div>
   <h2>Follow Ups</h2>
   <div id="followups"></div>
-  <p><a href="/profiles.html">Manage Contact Profiles</a></p>
+  <p>
+    <a href="/profiles.html">Manage Contact Profiles</a> |
+    <a href="/contacts.html">View All Contacts</a>
+  </p>
   <h2>Messages Sent Today</h2>
   <div id="sent"></div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="app.js"></script>
 </body>
+
 </html>

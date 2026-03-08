@@ -114,7 +114,7 @@ function startDashboard(client) {
   });
 
   app.get('/contacts', async (req, res) => {
-    const { rows } = await pool.query('SELECT id, name, profile FROM Contacts ORDER BY name');
+    const { rows } = await pool.query('SELECT seq, id, name, profile FROM Contacts ORDER BY seq');
     res.json(rows);
   });
 
