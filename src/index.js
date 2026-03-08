@@ -6,8 +6,10 @@ const { maybeFetchHistory } = require('./fetchHistory');
 const startDashboard = require('./dashboard');
 const audioJob = require('./audioJob');
 const vectorJob = require('./vectorJob');
+const { acquireLock } = require('./lock');
 
 async function start() {
+  acquireLock();
   console.log('Configuration loaded:', {
     asrEngine: config.asrEngine,
     llmEngine: config.llmEngine,
