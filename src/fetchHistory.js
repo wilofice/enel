@@ -1,6 +1,7 @@
 const { pool } = require('./db');
 const config = require('./config');
 const { logMessageDetails } = require('./messageLogger');
+const { sanitizeContactName, SQL_NAME_PREFERENCE } = require('./contactName');
 
 function normalizeChatId(chat) {
   if (!chat) return null;
@@ -20,15 +21,16 @@ function shouldSkipChat(chat) {
 async function upsertContact(chat) {
   if (shouldSkipChat(chat)) return;
   const id = normalizeChatId(chat);
-  const displayName =
+  const rawDisplayName =
     (chat.contact && (chat.contact.pushname || chat.contact.name)) ||
     chat.name ||
     chat.formattedTitle ||
     null;
+  const displayName = sanitizeContactName(rawDisplayName, id);
   try {
     await pool.query(
       `INSERT INTO Contacts(id, name) VALUES($1, $2)
-       ON CONFLICT (id) DO UPDATE SET name = COALESCE(EXCLUDED.name, Contacts.name)`,
+       ON CONFLICT (id) DO UPDATE SET name = ${SQL_NAME_PREFERENCE}`,
       [id, displayName]
     );
   } catch (err) {

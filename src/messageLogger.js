@@ -4,6 +4,7 @@ const mime = require('mime');
 const { pool } = require('./db');
 const config = require('./config');
 const asr = require('./asr');
+const { sanitizeContactName, SQL_NAME_PREFERENCE } = require('./contactName');
 
 function normalizeContactNumber(chatId) {
   if (!chatId) return null;
@@ -21,15 +22,16 @@ async function storeMessage(msg) {
   const lastSentAt = msg.fromMe ? timestamp : null;
 
   try {
-    const name =
+    const rawName =
       msg.notifyName ||
       msg.pushName ||
       (msg._data ? msg._data.notifyName || msg._data.pushName : null);
+    const name = sanitizeContactName(rawName, chatId);
     await pool.query(
       `INSERT INTO Contacts(id, name, contactNumber, lastSentAt, lastMessageAt)
        VALUES($1, $2, $3, $4, $5)
        ON CONFLICT (id) DO UPDATE SET
-         name = COALESCE(EXCLUDED.name, Contacts.name),
+         name = ${SQL_NAME_PREFERENCE},
          contactNumber = COALESCE(EXCLUDED.contactNumber, Contacts.contactNumber),
          lastSentAt = CASE
            WHEN EXCLUDED.lastSentAt IS NOT NULL THEN GREATEST(EXCLUDED.lastSentAt, Contacts.lastSentAt)

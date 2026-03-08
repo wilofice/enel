@@ -1,5 +1,6 @@
 const { pool } = require('./db');
 const config = require('./config');
+const { sanitizeContactName, SQL_NAME_PREFERENCE } = require('./contactName');
 
 const REFRESH_KEY = 'contactsRefreshedAt';
 
@@ -78,14 +79,14 @@ async function refreshContacts(client) {
     for (const c of contacts) {
       const waId = c.id?._serialized || c.id;
       if (!waId || waId.endsWith('@g.us') || waId.endsWith('@newsletter') || waId === 'status@broadcast') continue;
-      const name = c.pushname || c.name || null;
+      const name = sanitizeContactName(c.pushname || c.name || null, waId);
       const contactNumber = c.number || normalizeContactNumber(waId);
       const lastSentAt = lastSentMap.get(waId) || null;
       const lastMessageAt = lastMessageMap.get(waId) || null;
       await pool.query(
         `INSERT INTO Contacts(id, name, contactNumber, lastSentAt, lastMessageAt) VALUES($1, $2, $3, $4, $5)
          ON CONFLICT (id) DO UPDATE SET
-           name = COALESCE(EXCLUDED.name, Contacts.name),
+           name = ${SQL_NAME_PREFERENCE},
            contactNumber = COALESCE(EXCLUDED.contactNumber, Contacts.contactNumber),
            lastSentAt = CASE
              WHEN EXCLUDED.lastSentAt IS NOT NULL THEN GREATEST(EXCLUDED.lastSentAt, Contacts.lastSentAt)
