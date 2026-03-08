@@ -6,4 +6,5 @@ logs/
 .wwebjs_auth
 .wwebjs_cache
 data/
-chroma/app.lock
+chroma/
+app.lock
