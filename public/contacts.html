@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -33,6 +34,28 @@
     a {
       color: #0077cc;
     }
+
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .controls select {
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: 1px solid #bbb;
+      font-size: 14px;
+    }
   </style>
 </head>
 
@@ -40,9 +63,20 @@
   <h1>Contacts</h1>
   <p><a href="/">← Back to Dashboard</a></p>
 
-  <div style="margin-bottom: 20px;">
+  <div class="controls">
     <label>
       <input type="checkbox" id="filter-unknown" onchange="renderContacts()"> Hide Unknown Contacts
+    </label>
+    <label>
+      Sort
+      <select id="sort-select" onchange="renderContacts()">
+        <option value="last_sent:desc" selected>Last Sent (newest)</option>
+        <option value="last_sent:asc">Last Sent (oldest)</option>
+        <option value="name:asc">Name (A-Z)</option>
+        <option value="name:desc">Name (Z-A)</option>
+        <option value="seq:asc"># (low-high)</option>
+        <option value="seq:desc"># (high-low)</option>
+      </select>
     </label>
   </div>
 
@@ -70,6 +104,35 @@
       return date.toLocaleString();
     }
 
+    function sortContacts(list) {
+      const select = document.getElementById('sort-select');
+      const value = select ? select.value : 'last_sent:desc';
+      const [field, direction] = value.split(':');
+      const dir = direction === 'asc' ? 1 : -1;
+      const copy = list.slice();
+
+      copy.sort((a, b) => {
+        let aVal;
+        let bVal;
+
+        if (field === 'name') {
+          aVal = (a.name || '').toLowerCase();
+          bVal = (b.name || '').toLowerCase();
+        } else if (field === 'seq') {
+          aVal = typeof a.seq === 'number' ? a.seq : Number.MAX_SAFE_INTEGER;
+          bVal = typeof b.seq === 'number' ? b.seq : Number.MAX_SAFE_INTEGER;
+        } else {
+          aVal = a.last_sent ? parseInt(a.last_sent, 10) : 0;
+          bVal = b.last_sent ? parseInt(b.last_sent, 10) : 0;
+        }
+
+        if (aVal === bVal) return 0;
+        return aVal > bVal ? dir : -dir;
+      });
+
+      return copy;
+    }
+
     function renderContacts() {
       const showOnlyKnown = document.getElementById('filter-unknown').checked;
       const tbody = document.getElementById('contacts-body');
@@ -84,7 +147,9 @@
         return;
       }
 
-      filtered.forEach(c => {
+      const sorted = sortContacts(filtered);
+
+      sorted.forEach(c => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${c.seq}</td>

@@ -4,18 +4,241 @@
   <meta charset="utf-8">
   <title>Contact Profiles</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    #contactList { width: 200px; float: left; margin-right: 20px; }
-    textarea { width: 400px; height: 200px; }
+    :root {
+      color-scheme: light dark;
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --page-bg: radial-gradient(circle at top left, #f7fbff, #f0f4ff 40%, #eef4ff 65%, #edf2ff 100%);
+      --panel-bg: #ffffffea;
+      --panel-border: #dfe7f5;
+      --accent: #2860ff;
+      --accent-soft: #e5ecff;
+      --ink: #1f2640;
+      --muted: #6c7796;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--page-bg);
+      color: var(--ink);
+    }
+
+    .app-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 48px;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0 0 6px;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .panes {
+      display: flex;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 20px;
+      box-shadow: 0 12px 40px rgb(17 37 96 / 10%);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contacts-panel {
+      width: 300px;
+      flex-shrink: 0;
+      gap: 16px;
+    }
+
+    .details-panel {
+      flex: 1;
+      gap: 16px;
+      min-height: 360px;
+    }
+
+    .panel-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    #contactList {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      max-height: calc(100vh - 230px);
+      padding-right: 4px;
+    }
+
+    #contactList div {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f6f8ff;
+      font-weight: 500;
+      color: #1f2a56;
+      border: 1px solid transparent;
+      transition: border-color 140ms, transform 140ms;
+      cursor: pointer;
+    }
+
+    #contactList div:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    #contactName {
+      margin: 6px 0 0;
+      font-size: 26px;
+    }
+
+    textarea {
+      width: 100%;
+      flex: 1;
+      border-radius: 16px;
+      border: 1px solid #c8d3f9;
+      padding: 16px;
+      font-size: 15px;
+      resize: vertical;
+      min-height: 220px;
+      font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+      background: #fbfcff;
+      color: var(--ink);
+    }
+
+    textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-color: var(--accent);
+    }
+
+    .helper {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    #saveBtn {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 28px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: transform 140ms, box-shadow 140ms;
+      box-shadow: 0 10px 25px rgb(40 96 255 / 35%);
+    }
+
+    #saveBtn:hover {
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 960px) {
+      .panes {
+        flex-direction: column;
+      }
+
+      .contacts-panel {
+        width: 100%;
+      }
+
+      #contactList {
+        max-height: 280px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Contact Profiles</h1>
-  <div id="contactList"></div>
-  <div>
-    <h2 id="contactName"></h2>
-    <textarea id="profileText"></textarea><br>
-    <button id="saveBtn">Save</button>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Workspace</p>
+        <h1>Contact Profiles</h1>
+        <p class="subtitle">Review notes, capture context, and keep your relationship data tidy.</p>
+      </div>
+    </header>
+    <section class="panes">
+      <aside class="panel contacts-panel">
+        <div class="panel-header">
+          <h2>Contacts</h2>
+          <p class="muted">Pick a contact to load the latest notes.</p>
+        </div>
+        <div id="contactList"></div>
+      </aside>
+      <section class="panel details-panel">
+        <div class="panel-header">
+          <span class="badge">Profile</span>
+          <h2 id="contactName">Select a contact</h2>
+          <p class="helper">Profiles autosave to your backend when you click Save.</p>
+        </div>
+        <textarea id="profileText" placeholder="Add meeting notes, preferences, and action items..."></textarea>
+        <div class="actions">
+          <button id="saveBtn">Save Changes</button>
+        </div>
+      </section>
+    </section>
   </div>
   <script src="profiles.js"></script>
 </body>
