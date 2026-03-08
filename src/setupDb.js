@@ -6,7 +6,9 @@ async function setup() {
       id TEXT PRIMARY KEY,
       seq SERIAL UNIQUE,
       name TEXT,
-      profile TEXT
+      profile TEXT,
+      contactNumber TEXT UNIQUE,
+      lastSentAt BIGINT
     )`,
     `CREATE TABLE IF NOT EXISTS Messages (
       id TEXT PRIMARY KEY,
@@ -83,6 +85,18 @@ async function setup() {
   );
   queries.push(
     'ALTER TABLE Contacts ADD COLUMN IF NOT EXISTS profile TEXT'
+  );
+  queries.push(
+    'ALTER TABLE Contacts ADD COLUMN IF NOT EXISTS contactNumber TEXT'
+  );
+  queries.push(
+    'ALTER TABLE Contacts ADD COLUMN IF NOT EXISTS lastSentAt BIGINT'
+  );
+  queries.push(
+    'CREATE UNIQUE INDEX IF NOT EXISTS contacts_contactnumber_key ON Contacts(contactNumber) WHERE contactNumber IS NOT NULL'
+  );
+  queries.push(
+    'UPDATE Contacts SET contactNumber = id WHERE contactNumber IS NULL'
   );
   queries.push(
     'ALTER TABLE Transcripts ADD COLUMN IF NOT EXISTS language TEXT'

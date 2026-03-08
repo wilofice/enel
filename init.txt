@@ -39,7 +39,7 @@ Action & Logging:
 Based on user choice, the message is sent, discarded, or edited and sent.
 The final action and status are updated in the AiReplies database table.
 4. Database Schema Overview (PostgreSQL):
-Contacts: Stores contact info (id TEXT PRIMARY KEY, name TEXT, etc.).
+Contacts: Stores contact info (WhatsApp chat id TEXT PRIMARY KEY, serial seq, contactNumber TEXT UNIQUE, lastSentAt BIGINT, etc.).
 Messages: Core log of all incoming/outgoing messages (id TEXT PRIMARY KEY, chatId TEXT REFERENCES Contacts(id), etc.).
 Attachments: Links messages to saved media files on disk (id SERIAL PRIMARY KEY, messageId TEXT REFERENCES Messages(id), filePath TEXT).
 Transcripts: Stores text from transcribed audio messages (id SERIAL PRIMARY KEY, messageId TEXT REFERENCES Messages(id), transcriptText TEXT, asrEngine TEXT, language TEXT, languageConfidence REAL, translatedText TEXT, translationLanguage TEXT).

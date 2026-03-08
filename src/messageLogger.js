@@ -5,12 +5,20 @@ const { pool } = require('./db');
 const config = require('./config');
 const asr = require('./asr');
 
+function normalizeContactNumber(chatId) {
+  if (!chatId) return null;
+  const atIndex = chatId.indexOf('@');
+  return atIndex === -1 ? chatId : chatId.slice(0, atIndex);
+}
+
 async function storeMessage(msg) {
   if (!msg || !msg.id) return;
   const id = msg.id._serialized || msg.id;
   const chatId = msg.fromMe ? msg.to : msg.from;
   const timestamp = msg.timestamp;
   const body = msg.body;
+  const contactNumber = normalizeContactNumber(chatId);
+  const lastSentAt = msg.fromMe ? timestamp : null;
 
   try {
     const name =
@@ -18,8 +26,16 @@ async function storeMessage(msg) {
       msg.pushName ||
       (msg._data ? msg._data.notifyName || msg._data.pushName : null);
     await pool.query(
-      'INSERT INTO Contacts(id, name) VALUES($1, $2) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name',
-      [chatId, name]
+      `INSERT INTO Contacts(id, name, contactNumber, lastSentAt)
+       VALUES($1, $2, $3, $4)
+       ON CONFLICT (id) DO UPDATE SET
+         name = COALESCE(EXCLUDED.name, Contacts.name),
+         contactNumber = COALESCE(EXCLUDED.contactNumber, Contacts.contactNumber),
+         lastSentAt = CASE
+           WHEN EXCLUDED.lastSentAt IS NOT NULL THEN GREATEST(EXCLUDED.lastSentAt, Contacts.lastSentAt)
+           ELSE Contacts.lastSentAt
+         END`,
+      [chatId, name, contactNumber, lastSentAt]
     );
     await pool.query(
       `INSERT INTO Messages(id, chatId, fromMe, timestamp, body)
