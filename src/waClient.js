@@ -77,6 +77,11 @@ async function handleIncoming(client, msg) {
   }
 }
 
+const webVersion = config.whatsAppWebVersion || '2.3000.1017054665';
+const webVersionRemotePath =
+  config.webVersionRemotePath ||
+  'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html';
+
 function initWhatsApp() {
   return new Promise((resolve, reject) => {
     const client = new Client({
@@ -93,9 +98,11 @@ function initWhatsApp() {
         ],
         headless: true,
       },
+      webVersion,
       webVersionCache: {
         type: 'remote',
-        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.3000.1032274475-alpha.html',
+        remotePath: webVersionRemotePath,
+        strict: true
       }
     });
 
