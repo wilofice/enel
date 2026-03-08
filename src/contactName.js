@@ -8,6 +8,7 @@ function sanitizeContactName(rawName, contactId = null) {
   if (!name || name === '@') return null;
   if (JID_SUFFIX_RE.test(name)) return null;
   if (PURE_PHONE_RE.test(name)) return null;
+  if (/^[+0-9().\-\s]{7,}$/.test(name) && name.replace(/[^0-9]/g, '').length >= 7) return null;
 
   if (contactId) {
     const normalizedId = String(contactId).trim().toLowerCase();
@@ -26,7 +27,8 @@ CASE
   WHEN EXCLUDED.name IS NULL THEN Contacts.name
   WHEN Contacts.name IS NULL OR BTRIM(Contacts.name) = '' OR Contacts.name = '@' THEN EXCLUDED.name
   WHEN Contacts.name ~* '@(c[.]us|s[.]whatsapp[.]net|g[.]us|broadcast|newsletter)$' THEN EXCLUDED.name
-  WHEN Contacts.name ~ '^[+]?[0-9]{7,}$' AND EXCLUDED.name !~ '^[+]?[0-9]{7,}$' THEN EXCLUDED.name
+  WHEN REGEXP_REPLACE(COALESCE(Contacts.name, ''), '[^0-9]', '', 'g') ~ '^[0-9]{7,}$'
+    AND REGEXP_REPLACE(EXCLUDED.name, '[^0-9]', '', 'g') !~ '^[0-9]{7,}$' THEN EXCLUDED.name
   WHEN POSITION(' ' IN EXCLUDED.name) > 0
     AND POSITION(' ' IN COALESCE(Contacts.name, '')) = 0
     AND CHAR_LENGTH(EXCLUDED.name) >= CHAR_LENGTH(COALESCE(Contacts.name, '')) + 2 THEN EXCLUDED.name
