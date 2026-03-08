@@ -47,7 +47,7 @@ async function processQueue() {
 async function handleIncoming(client, msg) {
   await logMessageDetails(msg);
 
-  if(!generateDraftMessages) return;
+  if (!generateDraftMessages) return;
 
   const historyRecords = await getHistory(msg.from, config.historyLimit);
   if (historyRecords.length === 0) return;
@@ -114,6 +114,7 @@ function initWhatsApp() {
       }
     });
 
+    console.log('Initializing WhatsApp client...');
     client.initialize();
   });
 }
