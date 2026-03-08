@@ -22,8 +22,8 @@ const defaults = {
   profileLlmModel: 'llama3',
   whisperModel: 'base',
   chromaUrl: 'http://localhost:8000',
-  whatsAppWebVersion: '2.3000.1017054665',
-  webVersionRemotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}.html',
+  whatsAppWebVersion: '2.3000.1032274475',
+  webVersionRemotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/{version}-alpha.html',
   webVersionCacheStrict: false,
   dashboardUser: process.env.DASHBOARD_USER || null,
   dashboardPass: process.env.DASHBOARD_PASS || null
