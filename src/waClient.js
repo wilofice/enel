@@ -80,7 +80,15 @@ async function handleIncoming(client, msg) {
 function initWhatsApp() {
   return new Promise((resolve, reject) => {
     const client = new Client({
-      authStrategy: new LocalAuth()
+      authStrategy: new LocalAuth(),
+      puppeteer: {
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        headless: true,
+      },
+      webVersionCache: {
+        type: 'remote',
+        remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+      }
     });
 
     client.on('qr', (qr) => {
