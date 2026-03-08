@@ -1,3 +1,28 @@
+let currentId = null;
+
+function getNumericContactNumber(contact) {
+  if (!contact) return null;
+  const id = contact.id || '';
+  const rawContactNumber = contact.contactNumber || '';
+  const hasPhoneId = id.toLowerCase().endsWith('@c.us');
+  const source = rawContactNumber.toLowerCase().endsWith('@lid')
+    ? (hasPhoneId ? id : '')
+    : (rawContactNumber || (hasPhoneId ? id : ''));
+  const digits = source.split('@')[0].replace(/\D/g, '');
+  return digits.length >= 7 ? digits : null;
+}
+
+function formatContactNumber(contact) {
+  const digits = getNumericContactNumber(contact);
+  return digits ? '+' + digits : 'Unknown';
+}
+
+function displayName(contact) {
+  if (contact && contact.name && contact.name.trim()) return contact.name.trim();
+  const number = getNumericContactNumber(contact);
+  return number ? '+' + number : (contact && contact.id ? contact.id : 'Unknown contact');
+}
+
 async function loadContacts() {
   const res = await fetch('/contacts');
   const contacts = await res.json();
@@ -5,21 +30,24 @@ async function loadContacts() {
   list.innerHTML = '';
   contacts.forEach(c => {
     const div = document.createElement('div');
-    div.textContent = c.name || c.id;
+    const phone = formatContactNumber(c);
+    const label = displayName(c);
+    div.textContent = phone !== 'Unknown' && label !== phone ? `${label} (${phone})` : label;
     div.style.cursor = 'pointer';
-    div.onclick = () => selectContact(c.id, c.name);
+    div.onclick = () => selectContact(c);
     list.appendChild(div);
   });
 }
 
-let currentId = null;
-
-async function selectContact(id, name) {
-  const res = await fetch('/contacts/' + id);
+async function selectContact(contact) {
+  const res = await fetch('/contacts/' + contact.id);
   const data = await res.json();
-  currentId = id;
-  document.getElementById('contactName').textContent = name || id;
-  document.getElementById('profileText').value = data.profile || '';
+  const merged = { ...contact, ...data, id: contact.id };
+  currentId = merged.id;
+  document.getElementById('contactName').textContent = displayName(merged);
+  document.getElementById('contactNumber').textContent = 'Number: ' + formatContactNumber(merged);
+  document.getElementById('contactId').textContent = 'WhatsApp ID: ' + merged.id;
+  document.getElementById('profileText').value = merged.profile || '';
 }
 
 async function saveProfile() {

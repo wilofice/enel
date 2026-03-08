@@ -146,6 +146,35 @@
       font-size: 26px;
     }
 
+    .contact-subline {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .advanced {
+      margin: 0;
+      border: 1px solid #d3dcfb;
+      border-radius: 12px;
+      background: #f7f9ff;
+      padding: 10px 12px;
+    }
+
+    .advanced summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .advanced p {
+      margin: 10px 0 2px;
+      font-size: 13px;
+      color: #394370;
+      word-break: break-all;
+    }
+
     textarea {
       width: 100%;
       flex: 1;
@@ -231,6 +260,11 @@
         <div class="panel-header">
           <span class="badge">Profile</span>
           <h2 id="contactName">Select a contact</h2>
+          <p class="contact-subline" id="contactNumber">Number: -</p>
+          <details class="advanced">
+            <summary>Technical details</summary>
+            <p id="contactId">WhatsApp ID: -</p>
+          </details>
           <p class="helper">Profiles autosave to your backend when you click Save.</p>
         </div>
         <textarea id="profileText" placeholder="Add meeting notes, preferences, and action items..."></textarea>

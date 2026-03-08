@@ -133,7 +133,7 @@ function startDashboard(client) {
 
   app.get('/contacts/:id', async (req, res) => {
     const { id } = req.params;
-    const { rows } = await pool.query('SELECT id, name, profile FROM Contacts WHERE id=$1', [id]);
+    const { rows } = await pool.query('SELECT id, name, profile, contactNumber FROM Contacts WHERE id=$1', [id]);
     if (!rows.length) return res.status(404).send('Not found');
     res.json(rows[0]);
   });

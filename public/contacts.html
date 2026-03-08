@@ -56,6 +56,14 @@
       border: 1px solid #bbb;
       font-size: 14px;
     }
+
+    .technical-col {
+      display: none;
+    }
+
+    body.show-technical .technical-col {
+      display: table-cell;
+    }
   </style>
 </head>
 
@@ -78,6 +86,9 @@
         <option value="seq:desc"># (high-low)</option>
       </select>
     </label>
+    <label>
+      <input type="checkbox" id="show-technical" onchange="toggleTechnicalColumns()"> Show technical IDs
+    </label>
   </div>
 
   <table id="contacts-table">
@@ -85,13 +96,14 @@
       <tr>
         <th>#</th>
         <th>Name</th>
+        <th>Number</th>
         <th>Last Sent</th>
-        <th>Phone ID</th>
+        <th class="technical-col">WhatsApp ID</th>
       </tr>
     </thead>
     <tbody id="contacts-body">
       <tr>
-        <td colspan="4">Loading...</td>
+        <td colspan="5">Loading...</td>
       </tr>
     </tbody>
   </table>
@@ -102,6 +114,24 @@
       if (!ts) return '<em style="color:#999">Never</em>';
       const date = new Date(parseInt(ts) * 1000);
       return date.toLocaleString();
+    }
+
+    function formatContactNumber(contact) {
+      if (!contact) return '<em style="color:#999">Unknown</em>';
+
+      const raw = contact.contactNumber || '';
+      const normalized = raw.toLowerCase();
+      const fromId = (contact.id || '').toLowerCase().endsWith('@c.us') ? contact.id : '';
+      const candidate = normalized.endsWith('@lid') ? fromId : (raw || fromId);
+      const phoneBase = candidate.split('@')[0];
+      const digits = phoneBase.replace(/\D/g, '');
+      if (!digits) return '<em style="color:#999">Unknown</em>';
+      return '+' + digits;
+    }
+
+    function toggleTechnicalColumns() {
+      const enabled = document.getElementById('show-technical').checked;
+      document.body.classList.toggle('show-technical', enabled);
     }
 
     function sortContacts(list) {
@@ -143,7 +173,7 @@
         : allContacts;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4">${showOnlyKnown ? 'No known contacts found.' : 'No contacts found.'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5">${showOnlyKnown ? 'No known contacts found.' : 'No contacts found.'}</td></tr>`;
         return;
       }
 
@@ -154,8 +184,9 @@
         tr.innerHTML = `
           <td>${c.seq}</td>
           <td>${c.name || '<em style="color:#999">Unknown</em>'}</td>
+          <td>${formatContactNumber(c)}</td>
           <td>${formatDate(c.last_sent)}</td>
-          <td>${c.id}</td>
+          <td class="technical-col">${c.id}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -167,9 +198,10 @@
         allContacts = await res.json();
         renderContacts();
       } catch (err) {
-        document.getElementById('contacts-body').innerHTML = '<tr><td colspan="4">Error loading contacts.</td></tr>';
+        document.getElementById('contacts-body').innerHTML = '<tr><td colspan="5">Error loading contacts.</td></tr>';
       }
     }
+    toggleTechnicalColumns();
     loadContacts();
   </script>
 </body>
