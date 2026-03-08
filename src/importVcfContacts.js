@@ -84,10 +84,16 @@ function parseVcf(text) {
 }
 
 async function findContactIdsByDigits(digits) {
+  const contactDigitsExpr = `
+    COALESCE(
+      NULLIF(REGEXP_REPLACE(contactNumber, '[^0-9]', '', 'g'), ''),
+      CASE WHEN id LIKE '%@c.us' THEN SPLIT_PART(id, '@', 1) ELSE NULL END
+    )
+  `;
   const exact = await pool.query(
     `SELECT id
        FROM Contacts
-      WHERE REGEXP_REPLACE(COALESCE(contactNumber, SPLIT_PART(id, '@', 1)), '[^0-9]', '', 'g') = $1`,
+      WHERE ${contactDigitsExpr} = $1`,
     [digits]
   );
   if (exact.rowCount > 0) {
@@ -106,8 +112,8 @@ async function findContactIdsByDigits(digits) {
   const fuzzy = await pool.query(
     `SELECT id
        FROM Contacts
-      WHERE REGEXP_REPLACE(COALESCE(contactNumber, SPLIT_PART(id, '@', 1)), '[^0-9]', '', 'g') LIKE '%' || $1
-         OR $1 LIKE '%' || REGEXP_REPLACE(COALESCE(contactNumber, SPLIT_PART(id, '@', 1)), '[^0-9]', '', 'g')`,
+      WHERE ${contactDigitsExpr} LIKE '%' || $1
+         OR $1 LIKE '%' || ${contactDigitsExpr}`,
     [digits]
   );
   if (fuzzy.rowCount === 1) {

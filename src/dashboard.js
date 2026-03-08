@@ -115,16 +115,30 @@ function startDashboard(client) {
 
   app.get('/contacts', async (req, res) => {
     const { rows } = await pool.query(`
-      SELECT 
-        c.seq, 
-        c.id, 
-        c.name, 
+      WITH normalized_contacts AS (
+        SELECT
+          c.seq,
+          c.id,
+          c.name,
+          c.profile,
+          c.lastMessageAt,
+          COALESCE(
+            NULLIF(REGEXP_REPLACE(c.contactNumber, '[^0-9]', '', 'g'), ''),
+            CASE WHEN c.id LIKE '%@c.us' THEN SPLIT_PART(c.id, '@', 1) ELSE NULL END
+          ) AS contactNumber
+        FROM Contacts c
+      )
+      SELECT
+        c.seq,
+        c.id,
+        c.name,
         c.profile,
         c.contactNumber,
         c.lastMessageAt,
         COALESCE(c.lastMessageAt, MAX(m.timestamp)) as last_sent
-      FROM Contacts c
+      FROM normalized_contacts c
       LEFT JOIN Messages m ON c.id = m.chatId
+      WHERE c.contactNumber ~ '^[0-9]{7,}$'
       GROUP BY c.id, c.seq, c.name, c.profile, c.contactNumber, c.lastMessageAt
       ORDER BY c.seq
     `);

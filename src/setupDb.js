@@ -100,7 +100,24 @@ async function setup() {
     'CREATE UNIQUE INDEX IF NOT EXISTS contacts_contactnumber_key ON Contacts(contactNumber) WHERE contactNumber IS NOT NULL'
   );
   queries.push(
-    'UPDATE Contacts SET contactNumber = id WHERE contactNumber IS NULL'
+    `UPDATE Contacts
+        SET contactNumber = NULLIF(REGEXP_REPLACE(contactNumber, '[^0-9]', '', 'g'), '')
+      WHERE contactNumber IS NOT NULL
+        AND contactNumber NOT LIKE '%@lid'`
+  );
+  queries.push(
+    `UPDATE Contacts
+        SET contactNumber = SPLIT_PART(id, '@', 1)
+      WHERE (contactNumber IS NULL OR BTRIM(contactNumber) = '')
+        AND id LIKE '%@c.us'`
+  );
+  queries.push(
+    `UPDATE Contacts
+        SET contactNumber = NULL
+      WHERE id LIKE '%@lid'
+        AND (contactNumber IS NULL
+          OR contactNumber LIKE '%@lid'
+          OR contactNumber !~ '^[0-9]{7,}$')`
   );
   queries.push(
     'ALTER TABLE Transcripts ADD COLUMN IF NOT EXISTS language TEXT'

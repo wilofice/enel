@@ -8,8 +8,12 @@ const { sanitizeContactName, SQL_NAME_PREFERENCE } = require('./contactName');
 
 function normalizeContactNumber(chatId) {
   if (!chatId) return null;
-  const atIndex = chatId.indexOf('@');
-  return atIndex === -1 ? chatId : chatId.slice(0, atIndex);
+  const value = String(chatId);
+  if (value.includes('@') && !value.endsWith('@c.us')) return null;
+  const atIndex = value.indexOf('@');
+  const base = atIndex === -1 ? value : value.slice(0, atIndex);
+  const digits = base.replace(/\D/g, '');
+  return digits.length >= 7 ? digits : null;
 }
 
 async function storeMessage(msg) {

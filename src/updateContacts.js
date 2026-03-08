@@ -30,8 +30,11 @@ async function shouldRefresh() {
 
 function normalizeContactNumber(waId) {
   if (!waId) return null;
-  const atIndex = waId.indexOf('@');
-  return atIndex === -1 ? waId : waId.slice(0, atIndex);
+  const text = String(waId);
+  const atIndex = text.indexOf('@');
+  const base = atIndex === -1 ? text : text.slice(0, atIndex);
+  const digits = base.replace(/\D/g, '');
+  return digits.length >= 7 ? digits : null;
 }
 
 async function buildLastSentMap() {
@@ -80,7 +83,9 @@ async function refreshContacts(client) {
       const waId = c.id?._serialized || c.id;
       if (!waId || waId.endsWith('@g.us') || waId.endsWith('@newsletter') || waId === 'status@broadcast') continue;
       const name = sanitizeContactName(c.pushname || c.name || null, waId);
-      const contactNumber = c.number || normalizeContactNumber(waId);
+      const numberFromContact = normalizeContactNumber(c.number || null);
+      const numberFromId = waId.endsWith('@c.us') ? normalizeContactNumber(waId) : null;
+      const contactNumber = numberFromContact || numberFromId;
       const lastSentAt = lastSentMap.get(waId) || null;
       const lastMessageAt = lastMessageMap.get(waId) || null;
       await pool.query(
