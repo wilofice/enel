@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const config = require('./config');
 const db = require('./db');
 const setupDb = require('./setupDb');
@@ -8,6 +10,17 @@ const audioJob = require('./audioJob');
 const vectorJob = require('./vectorJob');
 const { acquireLock } = require('./lock');
 const { refreshContacts, shouldRefresh } = require('./updateContacts');
+
+const AUTH_DIR = path.join(__dirname, '..', '.wwebjs_auth');
+
+async function clearWhatsAppSession() {
+  try {
+    await fs.promises.rm(AUTH_DIR, { recursive: true, force: true });
+    console.log('Removed previous WhatsApp auth session cache');
+  } catch (err) {
+    console.warn('Failed to remove previous auth cache', err.message);
+  }
+}
 
 async function start() {
   acquireLock();
@@ -20,6 +33,7 @@ async function start() {
   });
   await db.waitForDb();
   await setupDb();
+  await clearWhatsAppSession();
   const client = await initWhatsApp();
   if (!config.skipFetchHistory) {
     await maybeFetchHistory(client);
