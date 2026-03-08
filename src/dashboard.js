@@ -114,7 +114,18 @@ function startDashboard(client) {
   });
 
   app.get('/contacts', async (req, res) => {
-    const { rows } = await pool.query('SELECT seq, id, name, profile FROM Contacts ORDER BY seq');
+    const { rows } = await pool.query(`
+      SELECT 
+        c.seq, 
+        c.id, 
+        c.name, 
+        c.profile,
+        MAX(m.timestamp) as last_sent
+      FROM Contacts c
+      LEFT JOIN Messages m ON c.id = m.chatId AND m.fromMe = true
+      GROUP BY c.id, c.seq, c.name, c.profile
+      ORDER BY c.seq
+    `);
     res.json(rows);
   });
 

@@ -1,53 +1,112 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <title>Contacts – Enel Dashboard</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
-    th { background: #f4f4f4; }
-    tr:hover { background: #fafafa; }
-    a { color: #0077cc; }
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #f4f4f4;
+    }
+
+    tr:hover {
+      background: #fafafa;
+    }
+
+    a {
+      color: #0077cc;
+    }
   </style>
 </head>
+
 <body>
   <h1>Contacts</h1>
   <p><a href="/">← Back to Dashboard</a></p>
+
+  <div style="margin-bottom: 20px;">
+    <label>
+      <input type="checkbox" id="filter-unknown" onchange="renderContacts()"> Hide Unknown Contacts
+    </label>
+  </div>
+
   <table id="contacts-table">
     <thead>
       <tr>
         <th>#</th>
         <th>Name</th>
+        <th>Last Sent</th>
         <th>Phone ID</th>
       </tr>
     </thead>
     <tbody id="contacts-body">
-      <tr><td colspan="3">Loading...</td></tr>
+      <tr>
+        <td colspan="4">Loading...</td>
+      </tr>
     </tbody>
   </table>
   <script>
-    async function loadContacts() {
-      const res = await fetch('/contacts');
-      const contacts = await res.json();
+    let allContacts = [];
+
+    function formatDate(ts) {
+      if (!ts) return '<em style="color:#999">Never</em>';
+      const date = new Date(parseInt(ts) * 1000);
+      return date.toLocaleString();
+    }
+
+    function renderContacts() {
+      const showOnlyKnown = document.getElementById('filter-unknown').checked;
       const tbody = document.getElementById('contacts-body');
       tbody.innerHTML = '';
-      if (contacts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3">No contacts found.</td></tr>';
+
+      const filtered = showOnlyKnown
+        ? allContacts.filter(c => c.name && c.name.trim() !== '')
+        : allContacts;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4">${showOnlyKnown ? 'No known contacts found.' : 'No contacts found.'}</td></tr>`;
         return;
       }
-      contacts.forEach(c => {
+
+      filtered.forEach(c => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${c.seq}</td>
           <td>${c.name || '<em style="color:#999">Unknown</em>'}</td>
+          <td>${formatDate(c.last_sent)}</td>
           <td>${c.id}</td>
         `;
         tbody.appendChild(tr);
       });
     }
+
+    async function loadContacts() {
+      try {
+        const res = await fetch('/contacts');
+        allContacts = await res.json();
+        renderContacts();
+      } catch (err) {
+        document.getElementById('contacts-body').innerHTML = '<tr><td colspan="4">Error loading contacts.</td></tr>';
+      }
+    }
     loadContacts();
   </script>
 </body>
+
 </html>
