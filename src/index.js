@@ -18,8 +18,12 @@ async function start() {
   await db.waitForDb();
   await setupDb();
   const client = await initWhatsApp();
-  await maybeFetchHistory(client);
-  await vectorJob.run();
+  if (!config.skipFetchHistory) {
+    await maybeFetchHistory(client);
+  }
+  if (!config.skipVectorJob) {
+    await vectorJob.run();
+  }
   //audioJob.startProcessing();
   startDashboard(client);
   console.log('WhatsApp AI Auto-Responder initialized');
