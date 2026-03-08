@@ -5,10 +5,11 @@ This script uses `chat.fetchMessages()` from **whatsapp-web.js** to backfill the
 ## Basic Flow
 
 1. Connect to WhatsApp using `LocalAuth`.
-2. Iterate over all chats that are not groups.
-3. For each chat, fetch a limited number of past messages (default 200).
-4. Save each message and any media to the database using the same logic as the `message_create` listener.
-5. Pause a few seconds between chats to reduce ban risk.
+2. Iterate over all chats that are not groups, newsletters, or status broadcasts.
+3. Upsert each chat into the `Contacts` table so active conversations appear in the dashboard even if the number is not saved.
+4. For each chat, fetch a limited number of past messages (default 200).
+5. Save each message and any media to the database using the same logic as the `message_create` listener.
+6. Pause a few seconds between chats to reduce ban risk.
 
 ## Usage Recommendations
 

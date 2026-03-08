@@ -14,7 +14,7 @@
   "ignoreShortMessages": false,
   "assistantLookbackDays": 2,
   "chromaUrl": "http://localhost:9090",
-  "skipFetchHistory": true,
+  "skipFetchHistory": false,
   "skipVectorJob": true,
   "dashboardPort": 3001,
   "contactRefreshDays": 7
